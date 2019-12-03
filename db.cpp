@@ -4,7 +4,7 @@ QMutex DB::_db_mutex;
 
 QSqlDatabase DB::get() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "global_conn");
-    db.setDatabaseName("dataset.db");
+    db.setDatabaseName("/Users/skyzh/Work/Qt/dataset.db");
     return db;
 }
 

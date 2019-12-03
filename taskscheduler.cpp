@@ -1,4 +1,4 @@
-#include "taskscheduler.h"
+#include "TaskScheduler.h"
 #include "db.h"
 
 #include <QEventLoop>
@@ -9,7 +9,7 @@
 #include <QSqlError>
 #include <QDateTime>
 
-TaskScheduler::TaskScheduler(QObject* parent) : QThread(parent), task_running(false) {
+TaskScheduler::TaskScheduler(QObject *parent) : QThread(parent), task_running(false) {
 
 }
 
@@ -46,20 +46,28 @@ bool TaskScheduler::is_journaled(QString journal_id) {
     }
 
     QSqlQuery q(db);
-    q.prepare("select count(*) from journal where journal_id=:journal_id");
+    q.prepare("select * from journal where journal_id=:journal_id");
     q.bindValue(":journal_id", journal_id);
     if (!q.exec()) {
         emit message(QString("SQL Error: %1").arg(q.lastError().text()));
         return false;
     }
-    q.next();
-    return q.value(0).toInt() != 0;
+    if (q.next()) {
+        QDateTime timestamp;
+        timestamp.setTime_t(q.value("complete_at").toUInt());
+        qDebug() << QString("%1 last journaled at %2")
+                .arg(journal_id)
+                .arg(timestamp.toString(Qt::SystemLocaleShortDate));
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void TaskScheduler::run() {
     if (!init_journal()) return;
     QEventLoop loop;
-    emit ready(true);
+    ready();
     loop.exec();
     if (task_running) {
         auto task = tasks.first();
@@ -92,7 +100,7 @@ bool TaskScheduler::init_journal() {
 void TaskScheduler::_schedule() {
     QMutexLocker l(&_tasks_mutex);
     if (task_running) return;
-    while(!tasks.empty()) {
+    while (!tasks.empty()) {
         auto task = tasks.first();
         if (task->journal() && is_journaled(task->name()))
             tasks.pop_front();
@@ -100,7 +108,7 @@ void TaskScheduler::_schedule() {
             break;
     }
     if (tasks.empty()) {
-        emit ready(true);
+        ready();
         return;
     }
     task_running = true;
@@ -108,18 +116,22 @@ void TaskScheduler::_schedule() {
     connect(task, &Task::progress, this, &TaskScheduler::on_progress);
     connect(task, &Task::message, this, &TaskScheduler::on_message);
     connect(task, &Task::success, this, &TaskScheduler::on_success);
+    current_task_name = task->display_name();
+    emit message(current_task_name);
+    emit progress(0.0);
     task->start();
-    current_task_name = task->name();
-    qDebug() << "running " << task->name();
-    emit ready(false);
 }
 
-void TaskScheduler::schedule(Task* task) {
+void TaskScheduler::schedule(Task *task) {
     _tasks_mutex.lock();
     connect(task, &Task::finished, task, &QObject::deleteLater);
     tasks.push_back(task);
     _tasks_mutex.unlock();
     QMetaObject::invokeMethod(this, &TaskScheduler::do_schedule);
+}
+
+void TaskScheduler::schedule(QString task, QStringList args) {
+    schedule(Task::get_from_factory(task, args, this));
 }
 
 void TaskScheduler::on_progress(qreal percent) {
@@ -144,3 +156,7 @@ void TaskScheduler::do_schedule() {
     _schedule();
 }
 
+void TaskScheduler::ready() {
+    emit message("Ready");
+    emit progress(1.0);
+}

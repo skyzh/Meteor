@@ -1,4 +1,4 @@
-#include "taskreaddataset.h"
+#include "TaskReadDataset.h"
 #include "db.h"
 
 #include <QSqlQuery>
@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QString>
+#include <QDateTime>
 
 TaskReadDataset::TaskReadDataset(QObject *parent) : Task(parent) {
 }
@@ -17,7 +18,11 @@ bool TaskReadDataset::journal() {
 }
 
 QString TaskReadDataset::name() {
-    return "Read Dataset";
+    return "read_dataset";
+}
+
+QString TaskReadDataset::display_name() {
+    return "Building database";
 }
 
 void TaskReadDataset::run() {
@@ -46,7 +51,7 @@ void TaskReadDataset::run() {
 
     // [2] Create table
     const QString DATASET_INIT = \
-            "create table dataset (time text, lineID text, stationID int, deviceID int, status int, userID text, payType int)";
+            "create table dataset (time text, timestamp int, lineID text, stationID int, deviceID int, status int, userID text, payType int)";
     if (!q.exec(DATASET_INIT)) {
         emit message(QString("SQL Error: %1").arg(q.lastError().text()));
         emit success(false);
@@ -71,8 +76,11 @@ void TaskReadDataset::run() {
         QTextStream in(&file);
         auto header = in.readLine();
         QString value_placeholder = "?";
-        int col_n = header.split(",").length();
+        QStringList _header = header.split(",");
+        int col_n = _header.length();
         for (int i = 1; i < col_n; i++) value_placeholder += ",?";
+
+        int time_col = _header.indexOf("time");
 
         // [5] Insert into database
         auto sql_statement = QString("insert into dataset (%1) values (%2)").arg(header).arg(value_placeholder);
@@ -81,7 +89,14 @@ void TaskReadDataset::run() {
         db.transaction();
         while (!in.atEnd()) {
             auto row = in.readLine().split(",");
-            for (int i = 0; i < col_n; i++) q.bindValue(i, row[i]);
+            for (int i = 0; i < col_n; i++) {
+                /*
+                if (i == time_col) {
+                    QDateTime dt = QDateTime::fromString(row[i], "yyyy-MM-dd hh:mm:ss");
+                    q.bindValue(i, dt.toSecsSinceEpoch());
+                } else */
+                q.bindValue(i, row[i]);
+            }
             if (!q.exec()) {
                 emit message(QString("SQL Error: %1").arg(q.lastError().text()));
                 emit success(false);

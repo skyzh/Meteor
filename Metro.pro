@@ -1,5 +1,6 @@
 QT       += core gui
 QT       += sql
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,15 +22,20 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     task.cpp \
-    taskreaddataset.cpp \
-    taskscheduler.cpp
+    task_delay.cpp \
+    task_factory.cpp \
+    task_query.cpp \
+    task_read_dataset.cpp \
+    task_scheduler.cpp
 
 HEADERS += \
     db.h \
     mainwindow.h \
     task.h \
-    taskreaddataset.h \
-    taskscheduler.h
+    task_delay.h \
+    task_query.h \
+    task_read_dataset.h \
+    task_scheduler.h
 
 FORMS += \
     mainwindow.ui
