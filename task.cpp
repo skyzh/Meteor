@@ -1,5 +1,7 @@
 #include "Task.h"
 
+#include <QSqlError>
+
 Task::Task(QObject *parent) : QThread(parent), _cancel(false) {
 }
 
@@ -22,8 +24,9 @@ QString Task::display_name() {
 void Task::run() {
 }
 
-void Task::args(QStringList args) {
+void Task::args(QVariantList args) {
     _args = args;
+    parse_args();
 }
 
 Task::~Task() {}
@@ -32,9 +35,23 @@ void Task::cancel() {
     _cancel = true;
 }
 
-QString Task::get_arg(int idx) {
+QVariant Task::get_arg(int idx) {
     if (idx < _args.size())
         return _args[idx];
     else
-        return "";
+        return QVariant();
+}
+
+void Task::emit_sql_error(QString type, QSqlQuery &q) {
+    emit message(QString("%1: %2").arg(type).arg(q.lastError().text()));
+    emit success(false);
+}
+
+void Task::emit_db_error(QString type, QSqlDatabase &db) {
+    emit message(QString("%1: %2").arg(type).arg(db.lastError().text()));
+    emit success(false);
+}
+
+bool Task::parse_args() {
+    return true;
 }

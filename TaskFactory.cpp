@@ -2,6 +2,7 @@
 #include "TaskReadDataset.h"
 #include "TaskDelay.h"
 #include "TaskQueryEntryExit.h"
+#include "TaskAddTimestamp.h"
 
 #include <QDebug>
 
@@ -18,7 +19,7 @@ Task* _get_task(QString task, QObject* parent) {
     return nullptr;
 }
 
-Task* Task::get_from_factory(QString task, QStringList args, QObject* parent) {
+Task* Task::get_from_factory(QString task, QVariantList args, QObject* parent) {
     Task* _task = _get_task(task, parent);
     if (_task == nullptr)
         qDebug() << task << " not found!";

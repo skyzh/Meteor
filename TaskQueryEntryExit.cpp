@@ -17,7 +17,7 @@ QString get_timestamp_str(unsigned int tsp) {
     return timestamp.toString(Qt::SystemLocaleShortDate);
 }
 
-TaskQueryEntryExit::TaskQueryEntryExit(QObject *parent) : TaskQuery(parent) {
+TaskQueryEntryExit::TaskQueryEntryExit(QObject *parent) : Task(parent) {
 
 }
 
@@ -26,17 +26,42 @@ void TaskQueryEntryExit::run() {
     QSqlDatabase db = _db.get();
 
     if (!db.open()) {
-        emit message(QString("Failed to open SQL connection: %1").arg(db.lastError().text()));
-        emit success(false);
+        emit_db_error("Open SQL connection", db);
         return;
     }
 
     QSqlQuery q(db);
+    const QString QUERY = "select (time / :time_div) as time_div, "
+                          "status, "
+                          "count(*) from dataset "
+                          "where "
+                          ":start_time <= time "
+                          "and time < :end_time "
+                          "group by time_div, status";
+    q.prepare(QUERY);
+    q.bindValue(":time_div", time_div);
+    q.bindValue(":start_time", start_time);
+    q.bindValue(":end_time", end_time);
+    if (!q.exec()) {
+        emit_sql_error("Query Error", q);
+        return;
+    }
 
-    auto start_timestamp = get_arg(0).toUInt(), end_timestamp = get_arg(1).toUInt();
+    int cnt = 0;
 
-    qDebug() << get_timestamp_str(start_timestamp) << " " << get_timestamp_str(end_timestamp);
+    {
+        QMutexLocker l(&_data_mutex);
+        data.clear();
+        while (q.next()) {
+            data.push_back(EntryExitResult{
+                    q.value(0).toULongLong() * time_div,
+                    q.value(1).toULongLong(),
+                    q.value(2).toULongLong()
+            });
+        }
+    }
 
+    emit result();
     emit success(true);
 }
 
@@ -45,9 +70,17 @@ QString TaskQueryEntryExit::name() {
 }
 
 QString TaskQueryEntryExit::display_name() {
-    return "Query Entry / Exit";
+    return QString("Query Station %2")
+        .arg(get_timestamp_str(start_time));
 }
 
 TaskQueryEntryExit::~TaskQueryEntryExit() {
 
+}
+
+bool TaskQueryEntryExit::parse_args() {
+    time_div = get_arg(0).toUInt();
+    start_time = get_arg(1).toUInt();
+    end_time = get_arg(2).toUInt();
+    return true;
 }

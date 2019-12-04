@@ -49,7 +49,7 @@ public:
 
     void schedule(Task *task);
 
-    void schedule(QString task, QStringList args = QStringList());
+    void schedule(QString task, QVariantList args = QVariantList());
 
     ~TaskScheduler() override;
 };

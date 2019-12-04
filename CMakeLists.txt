@@ -23,12 +23,10 @@ add_executable(Metro
         TaskDelay.cpp
         TaskDelay.h
         TaskFactory.cpp
-        TaskQuery.cpp
-        TaskQuery.h
         TaskReadDataset.cpp
         TaskReadDataset.h
         TaskScheduler.cpp
         TaskScheduler.h
-        mainwindow.ui TaskQueryEntryExit.cpp TaskQueryEntryExit.h)
+        mainwindow.ui TaskQueryEntryExit.cpp TaskQueryEntryExit.h TaskAddTimestamp.cpp TaskAddTimestamp.h)
 
 target_link_libraries(Metro PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts)

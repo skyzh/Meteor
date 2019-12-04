@@ -1,10 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "TaskQuery.h"
+#include "TaskQueryEntryExit.h"
 
 #include <QDebug>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QValueAxis>
+#include <QDateTimeAxis>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setup_status_bar();
-    setup_chart();
     connect(&scheduler, &TaskScheduler::progress, this, &MainWindow::progress);
     connect(&scheduler, &TaskScheduler::message, this, &MainWindow::message);
     scheduler.start();
@@ -27,7 +28,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 void MainWindow::progress(qreal percent) {
-    schedulerProgress->setValue(int(percent * 100));
+    if (percent == 0.0) {
+        schedulerProgress->setRange(0, 0);
+    } else {
+        schedulerProgress->setRange(0, 100);
+        schedulerProgress->setValue(int(percent * 100));
+    }
 }
 
 void MainWindow::message(QString msg) {
@@ -39,10 +45,14 @@ void MainWindow::on_pushButton_clicked() {
     QDateTime start, end;
     start.setDate(QDate(2019, 1, 9));
     end.setDate(QDate(2019, 1, 10));
-    start.toSecsSinceEpoch();
-    scheduler.schedule("query_entry_exit");
-    chart->removeSeries(series);
-    chart->addSeries(series);
+    TaskQueryEntryExit* task = new TaskQueryEntryExit(this);
+    task->args({ 3600, start.toSecsSinceEpoch(), end.toSecsSinceEpoch() });
+    connect(task, &TaskQueryEntryExit::result, [=] () {
+        QMutexLocker l(&task->_data_mutex);
+        this->data = task->data;
+        QMetaObject::invokeMethod(this, &MainWindow::update_chart);
+    });
+    scheduler.schedule(task);
 }
 
 void MainWindow::setup_status_bar() {
@@ -54,20 +64,34 @@ void MainWindow::setup_status_bar() {
     ui->statusbar->addPermanentWidget(schedulerMessage, 0);
 }
 
-void MainWindow::setup_chart() {
-    series = new QLineSeries();
-    series->append(0, 6);
-    series->append(2, 4);
-    series->append(3, 8);
-    series->append(7, 4);
-    series->append(10, 5);
-    *series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
+void MainWindow::setup_chart(QLineSeries* series) {
+    ui->verticalLayout->removeWidget(chartView);
     chart = new QChart();
     chart->legend()->hide();
     chart->addSeries(series);
-    chart->createDefaultAxes();
-    chart->setTitle("Simple line chart example");
-    QChartView *chartView = new QChartView(chart);
+    QDateTimeAxis *axisX = new QDateTimeAxis;
+    axisX->setTickCount(10);
+    axisX->setFormat("MM-dd");
+    axisX->setTitleText("Time");
+    chart->addAxis(axisX, Qt::AlignBottom);
+    series->attachAxis(axisX);
+    QValueAxis *axisY = new QValueAxis;
+    axisY->setLabelFormat("%i");
+    axisY->setTitleText("Count");
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
+    chart->setTitle("In/Out of Station");
+    chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
     ui->verticalLayout->addWidget(chartView);
+}
+
+void MainWindow::update_chart() {
+    QLineSeries* series = new QLineSeries;
+    foreach(auto record, data) {
+        if (record.status == 0)
+            series->append(record.timestamp, record.count);
+    }
+    qDebug() << series;
+    this->setup_chart(series);
 }

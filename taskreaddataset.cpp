@@ -30,8 +30,7 @@ void TaskReadDataset::run() {
     QSqlDatabase db = _db.get();
 
     if (!db.open()) {
-        emit message(QString("Failed to open SQL connection: %1").arg(db.lastError().text()));
-        emit success(false);
+        emit_db_error("Failed to open SQL connection", db);
         return;
     }
 
@@ -51,17 +50,29 @@ void TaskReadDataset::run() {
 
     // [2] Create table
     const QString DATASET_INIT = \
-            "create table dataset (time text, timestamp int, lineID text, stationID int, deviceID int, status int, userID text, payType int)";
+            "create table dataset (id int primary key, time int, lineID text, stationID int, deviceID int, status int, userID text, payType int)";
     if (!q.exec(DATASET_INIT)) {
-        emit message(QString("SQL Error: %1").arg(q.lastError().text()));
-        emit success(false);
+        emit_sql_error("SQL Error", q);
+        return;
+    }
+
+    if (!q.exec("create index time on dataset (time ASC)")) {
+        emit_sql_error("SQL Error", q);
+        return;
+    }
+
+    if (!q.exec("create index stationID_line on dataset (stationID ASC, lineID ASC)")) {
+        emit_sql_error("SQL Error", q);
         return;
     }
 
     int cnt = 0;
+    int id = 0;
+    tm _tm;
+    time_t epoch;
 
     foreach(QString filename, datasets) {
-        emit message(QString("Importing %1").arg(filename));
+        emit message(QString("processing %1").arg(filename));
         emit progress(double(cnt++) / datasets.length());
 
         // [3] Try open file
@@ -83,20 +94,22 @@ void TaskReadDataset::run() {
         int time_col = _header.indexOf("time");
 
         // [5] Insert into database
-        auto sql_statement = QString("insert into dataset (%1) values (%2)").arg(header).arg(value_placeholder);
+        auto sql_statement = QString("insert into dataset (%1,id) values (%2,?)").arg(header).arg(value_placeholder);
 
         q.prepare(sql_statement);
         db.transaction();
         while (!in.atEnd()) {
             auto row = in.readLine().split(",");
             for (int i = 0; i < col_n; i++) {
-                /*
                 if (i == time_col) {
-                    QDateTime dt = QDateTime::fromString(row[i], "yyyy-MM-dd hh:mm:ss");
-                    q.bindValue(i, dt.toSecsSinceEpoch());
-                } else */
-                q.bindValue(i, row[i]);
+                    QByteArray _datetime = row[i].toLatin1();
+                    if (strptime(_datetime.data(), "%Y-%m-%d %H:%M:%S", &_tm) != NULL)
+                        epoch = mktime(&_tm);
+                    q.bindValue(i, (qulonglong) epoch);
+                } else
+                    q.bindValue(i, row[i]);
             }
+            q.bindValue(col_n, id++);
             if (!q.exec()) {
                 emit message(QString("SQL Error: %1").arg(q.lastError().text()));
                 emit success(false);

@@ -5,9 +5,16 @@
 #ifndef METRO_TASKQUERYENTRYEXIT_H
 #define METRO_TASKQUERYENTRYEXIT_H
 
-#include "TaskQuery.h"
+#include "Task.h"
+#include <QObject>
 
-class TaskQueryEntryExit : public TaskQuery {
+class TaskQueryEntryExit : public Task {
+    Q_OBJECT
+
+private:
+    long long start_time;
+    long long end_time;
+    long long time_div;
 public:
     TaskQueryEntryExit(QObject *parent = nullptr);
 
@@ -18,6 +25,21 @@ public:
     QString display_name() override;
 
     ~TaskQueryEntryExit() override;
+
+    struct EntryExitResult {
+        unsigned long long timestamp;
+        unsigned long long status;
+        unsigned long long count;
+    };
+
+    QMutex _data_mutex;
+    QList<EntryExitResult> data;
+
+signals:
+    void result();
+
+protected:
+    bool parse_args() override;
 };
 
 

@@ -130,7 +130,7 @@ void TaskScheduler::schedule(Task *task) {
     QMetaObject::invokeMethod(this, &TaskScheduler::do_schedule);
 }
 
-void TaskScheduler::schedule(QString task, QStringList args) {
+void TaskScheduler::schedule(QString task, QVariantList args) {
     schedule(Task::get_from_factory(task, args, this));
 }
 
