@@ -43,7 +43,7 @@ void TaskReadDataset::run() {
     QStringList _datasets = directory.entryList(QStringList() << "*.csv" << "*.CSV", QDir::Files);
     QStringList datasets;
     QString filename_prefix = QString("record_%1").arg(at_date);
-    foreach(QString dataset, _datasets) {
+    for (auto &&dataset : _datasets) {
         if (dataset.startsWith(filename_prefix)) datasets.push_back(dataset);
     }
 
@@ -56,7 +56,7 @@ void TaskReadDataset::run() {
 
     emit message("Processing files");
 
-    foreach(QString filename, datasets) {
+    for (auto &&filename : datasets) {
         emit progress(double(cnt++) / datasets.length());
 
         // [1] Try open file
@@ -124,5 +124,5 @@ bool TaskReadDataset::parse_args() {
 }
 
 QList<Task *> TaskReadDataset::dependencies() {
-    return { new TaskInitDatabase };
+    return {new TaskInitDatabase};
 }

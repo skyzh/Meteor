@@ -15,7 +15,6 @@ private:
     long long start_time;
     long long end_time;
     long long time_div;
-    bool query_all;
     long long station_id;
     QString line_id;
 public:

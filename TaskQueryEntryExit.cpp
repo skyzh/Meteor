@@ -33,24 +33,32 @@ void TaskQueryEntryExit::run() {
 
     QSqlQuery q(db);
 
-    const QString QUERY = "select (time / :time_div) as time_div, "
-                          "status, "
-                          "count(*) from dataset "
-                          "where "
-                          ":start_time <= time "
-                          "and time < :end_time "
-                          "%1 "
-                          "group by time_div, status";
-    if (query_all) q.prepare(QUERY.arg(""));
-    else q.prepare(QUERY.arg("and stationID = :station_id and lineID = :line_id"));
+    QString QUERY = "select (time / :time_div) as time_div, "
+                    "status, "
+                    "count(*) from dataset "
+                    "where "
+                    ":start_time <= time "
+                    "and time < :end_time "
+                    "and %1 "
+                    "and %2 "
+                    "group by time_div, status";
+    if (station_id < 0)
+        QUERY = QUERY.arg("1");
+    else QUERY = QUERY.arg("stationID = :station_id");
+
+    if (line_id == "")
+        QUERY = QUERY.arg("1");
+    else QUERY = QUERY.arg("lineID = :line_id");
+
+    q.prepare(QUERY);
+
     q.bindValue(":time_div", time_div);
     q.bindValue(":start_time", start_time);
     q.bindValue(":end_time", end_time);
-    if (!query_all) {
-        q.bindValue(":station_id", station_id);
+    if (line_id != "")
         q.bindValue(":line_id", line_id);
-    }
-    qDebug() << query_all << " " << station_id << " " << line_id;
+    if (station_id >= 0)
+        q.bindValue(":station_id", station_id);
     if (!q.exec()) {
         emit_sql_error("Query Error", q);
         return;
@@ -61,7 +69,17 @@ void TaskQueryEntryExit::run() {
     {
         QMutexLocker l(&_data_mutex);
         data.clear();
+        auto _stt = start_time / time_div;
+        auto _ett = end_time / time_div;
+
+        auto lst_time = _stt;
         while (q.next()) {
+            auto time_block = q.value(0).toULongLong();
+            for (unsigned long long i = lst_time; i < time_block; i++) {
+                data.push_back(EntryExitResult{i * time_div, 0, 0});
+                data.push_back(EntryExitResult{i * time_div, 1, 0});
+            }
+            lst_time = time_block + 1;
             data.push_back(EntryExitResult{
                     q.value(0).toULongLong() * time_div,
                     q.value(1).toULongLong(),
@@ -71,21 +89,22 @@ void TaskQueryEntryExit::run() {
     }
 
     emit result();
+
     emit success(true);
 
     db.close();
+
 }
 
 QString TaskQueryEntryExit::name() {
     return QString("query_entry_exit:%1:%2:%3")
-        .arg(time_div)
-        .arg(start_time)
-        .arg(end_time);
+            .arg(time_div)
+            .arg(start_time)
+            .arg(end_time);
 }
 
 QString TaskQueryEntryExit::display_name() {
-    return QString("Query Station %2")
-        .arg(get_timestamp_str(start_time));
+    return QString("Query Entry/Exit");
 }
 
 TaskQueryEntryExit::~TaskQueryEntryExit() {
@@ -96,22 +115,21 @@ bool TaskQueryEntryExit::parse_args() {
     time_div = get_arg(0).toUInt();
     start_time = get_arg(1).toUInt();
     end_time = get_arg(2).toUInt();
-    if (get_arg(3).toString() == "all") query_all = true;
-    else {
-        line_id = get_arg(3).toString();
-        station_id = get_arg(4).toUInt();
-    }
+    line_id = get_arg(3).toString();
+    station_id = get_arg(4).toUInt();
+    if (get_arg(3).toString() == "All") line_id = "";
+    if (get_arg(4).toString() == "All") station_id = -1;
     return true;
 }
 
-QList<Task*> TaskQueryEntryExit::dependencies() {
-    QList<Task*> dependencies;
+QList<Task *> TaskQueryEntryExit::dependencies() {
+    QList<Task *> dependencies;
     for (long long time = start_time; time < end_time; time += 86400) {
         QDateTime timestamp;
         timestamp.setTime_t(time);
         QString date = timestamp.toString("yyyy-MM-dd");
         TaskReadDataset *task = new TaskReadDataset(parent());
-        task->args({ date });
+        task->args({date});
         dependencies.push_back(task);
     }
     return dependencies;

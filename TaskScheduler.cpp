@@ -104,9 +104,10 @@ void TaskScheduler::_schedule() {
     if (task_running) return;
     while (!tasks.empty()) {
         auto task = tasks.first();
-        if (task->journal() && is_journaled(task->name()))
+        if (task->journal() && is_journaled(task->name())) {
             tasks.pop_front();
-        else
+            ++task_cnt;
+        } else
             break;
     }
     if (tasks.empty()) {
@@ -177,10 +178,10 @@ void TaskScheduler::emit_message(QString msg) {
 }
 
 void TaskScheduler::resolve(Task *task) {
-    QList<Task*> dependencies = task->dependencies();
+    QList<Task *> dependencies = task->dependencies();
     ++task_cnt_total;
-    tasks.push_front(task);
-    foreach(Task* dependency, dependencies) {
+    for (Task *dependency: dependencies) {
         resolve(dependency);
     }
+    tasks.push_back(task);
 }

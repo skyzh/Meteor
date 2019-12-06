@@ -10,9 +10,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 find_package(Qt5 COMPONENTS Widgets Sql Charts REQUIRED)
 
-add_executable(Metro
+add_executable(Meteor
         db.cpp
         db.h
         main.cpp
@@ -29,4 +31,4 @@ add_executable(Metro
         TaskScheduler.h
         mainwindow.ui TaskQueryEntryExit.cpp TaskQueryEntryExit.h TaskAddTimestamp.cpp TaskAddTimestamp.h TaskInitDatabase.cpp TaskInitDatabase.h)
 
-target_link_libraries(Metro PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts)
+target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts)

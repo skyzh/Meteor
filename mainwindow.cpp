@@ -7,11 +7,32 @@
 #include <QDateTime>
 #include <QValueAxis>
 #include <QDateTimeAxis>
+#include <QSizePolicy>
+#include <QGraphicsLayout>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), scheduler(this) {
     ui->setupUi(this);
+    ui->tabWidget->setAutoFillBackground(true);
+    ui->tab_passenger_traffic->setAutoFillBackground(true);
     setup_status_bar();
+    {
+        QStringList list;
+        for (int i = 0; i <= 80; i++) {
+            list << QString("%1").arg(i);
+        }
+        ui->comboStation->addItems(list);
+        ui->comboRouteFrom->addItems(list);
+        ui->comboRouteTo->addItems(list);
+    }
+    {
+        QStringList list;
+        for (int i = 'A'; i <= 'C'; i++) {
+            list << QString(i);
+        }
+        ui->comboLine->addItems(list);
+    }
+
     connect(&scheduler, &TaskScheduler::progress, this, &MainWindow::progress);
     connect(&scheduler, &TaskScheduler::message, this, &MainWindow::message);
     scheduler.start();
@@ -36,25 +57,6 @@ void MainWindow::message(QString msg) {
     schedulerMessage->setText(msg);
 }
 
-void MainWindow::on_pushButton_clicked() {
-    QDateTime start, end;
-    start = ui->fromTime->dateTime();
-    end = ui->toTime->dateTime();
-    TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
-    task->args({
-                       3600,
-                       start.toSecsSinceEpoch(),
-                       end.toSecsSinceEpoch(),
-                       "C",
-                       41});
-    connect(task, &TaskQueryEntryExit::result, [=]() {
-        QMutexLocker l(&task->_data_mutex);
-        this->data = task->data;
-        QMetaObject::invokeMethod(this, &MainWindow::update_chart);
-    });
-    scheduler.schedule(task);
-}
-
 void MainWindow::setup_status_bar() {
     schedulerMessage = new QLabel(this);
     schedulerProgress = new QProgressBar(this);
@@ -64,34 +66,68 @@ void MainWindow::setup_status_bar() {
     ui->statusbar->addPermanentWidget(schedulerMessage, 0);
 }
 
-void MainWindow::setup_chart(QLineSeries *series) {
-    ui->verticalLayout->removeWidget(chartView);
+void MainWindow::setup_chart(QList<QLineSeries *> series) {
+    if (chartView) ui->layoutChart->removeWidget(chartView);
     chart = new QChart();
     chart->legend()->hide();
-    chart->addSeries(series);
     QDateTimeAxis *axisX = new QDateTimeAxis;
-    axisX->setTickCount(10);
+    axisX->setTickCount(12);
     axisX->setFormat("MM-dd HH:mm");
-    axisX->setTitleText("Time");
+    axisX->setLabelsAngle(-90);
     chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
     QValueAxis *axisY = new QValueAxis;
     axisY->setLabelFormat("%i");
-    axisY->setTitleText("Count");
     chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-    chart->setTitle("In/Out of Station");
+
+    for (auto _series : series) {
+        chart->addSeries(_series);
+        _series->attachAxis(axisX);
+        _series->attachAxis(axisY);
+    }
+
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
-    ui->verticalLayout->addWidget(chartView);
+    ui->layoutChart->addWidget(chartView);
+    chart->layout()->setContentsMargins(0, 0, 0, 0);
+    chart->setBackgroundRoundness(0);
 }
 
 void MainWindow::update_chart() {
-    QLineSeries *series = new QLineSeries;
-            foreach(auto record, data) {
-            if (record.status == 0)
-                series->append(record.timestamp * 1000, record.count);
-        }
-    qDebug() << series;
-    this->setup_chart(series);
+    QLineSeries *in_series = new QLineSeries;
+    QLineSeries *out_series = new QLineSeries;
+
+    for (auto &&record : data) {
+        if (record.status == 0)
+            in_series->append(record.timestamp * 1000, record.count);
+        if (record.status == 1)
+            out_series->append(record.timestamp * 1000, record.count);
+    }
+    this->setup_chart({in_series, out_series});
+}
+
+void MainWindow::on_pushButtonRoutePlanning_clicked() {
+
+}
+
+void MainWindow::on_pushButtonQuery_clicked() {
+    long long start = ui->fromTime->dateTime().toSecsSinceEpoch();
+    long long end = ui->toTime->dateTime().toSecsSinceEpoch();
+    long long time_div = 3600;
+    if (end - start <= 60 * 60 * 12) time_div = 1800;
+    if (end - start <= 60 * 60 * 1) time_div = 60;
+    if (end - start <= 60) time_div = 1;
+    TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
+    task->args({
+                       time_div,
+                       start,
+                       end,
+                       ui->comboLine->currentText(),
+                       ui->comboStation->currentText()
+               });
+    connect(task, &TaskQueryEntryExit::result, [=]() {
+        QMutexLocker l(&task->_data_mutex);
+        this->data = task->data;
+        QMetaObject::invokeMethod(this, &MainWindow::update_chart);
+    });
+    scheduler.schedule(task);
 }

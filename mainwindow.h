@@ -27,7 +27,6 @@ private slots:
 
     void message(QString msg);
 
-    void on_pushButton_clicked();
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -42,7 +41,7 @@ private:
 
     void setup_status_bar();
 
-    void setup_chart(QLineSeries *series);
+    void setup_chart(QList<QLineSeries *> series);
 
     QList<TaskQueryEntryExit::EntryExitResult> data;
     QChart *chart;
@@ -51,6 +50,10 @@ private:
 private slots:
 
     void update_chart();
+
+    void on_pushButtonRoutePlanning_clicked();
+
+    void on_pushButtonQuery_clicked();
 };
 
 #endif // MAINWINDOW_H
