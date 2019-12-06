@@ -15,10 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
     setup_status_bar();
     ui->comboStation->addItem("All", "All");
     {
-        QStringList list;
-        list << "B - Line 1"; // 202 45 92
-        list << "A - Line 4"; // 130 192 90
-        list << "C - Line 2"; // 240 136 62
         ui->comboLine->addItem("All", "All");
         ui->comboLine->addItem("A - Line 4", "A");
         ui->comboLine->addItem("B - Line 1", "B");
@@ -80,11 +76,16 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
     axisY->setLabelFormat("%i");
     chart->addAxis(axisY, Qt::AlignLeft);
 
+    qreal xx = 0;
+
     for (auto _series : series) {
         chart->addSeries(_series);
         _series->attachAxis(axisX);
         _series->attachAxis(axisY);
+        for (auto &&d : _series->points()) xx = qMax(xx, d.y());
     }
+
+    axisY->setRange(0, xx);
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -176,6 +177,7 @@ void MainWindow::load_station_mapping() {
         QMetaObject::invokeMethod(this, [=]() {
             this->station_mapping = data;
             QList<MetroStation> stations;
+            QList<MetroSegment> segments;
             int q = 0;
             for (auto &&mapping: data) {
                 QString station = QString("(%3)%1 - %2")
@@ -186,15 +188,25 @@ void MainWindow::load_station_mapping() {
                 ui->comboRouteFrom->addItem(station, mapping.stationID);
                 ui->comboRouteTo->addItem(station, mapping.stationID);
                 if (mapping.lineID == "A") {
-                    stations << MetroStation {
+                    auto station = MetroStation {
                         mapping.name,
                         mapping.stationID,
                         (q++) * 150.0,
-                        0
+                        0,
+                        mapping.lineID
                     };
+                    if (!stations.empty()) {
+                        auto lst_station = stations.last();
+                        segments << MetroSegment {
+                            lst_station.x, lst_station.y,
+                            station.x, station.y,
+                            mapping.lineID
+                        };
+                    }
+                    stations << station;
                 }
             }
-            metroWidget->setStations(stations);
+            metroWidget->setStations(stations, segments);
         });
     });
     scheduler.schedule(task);

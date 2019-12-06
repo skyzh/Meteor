@@ -14,6 +14,12 @@ struct MetroStation {
     QString name;
     qulonglong id;
     qreal x, y;
+    QString lineID;
+};
+
+struct MetroSegment {
+    qreal x1, y1, x2, y2;
+    QString lineID;
 };
 
 class MetroPainter {
@@ -22,8 +28,16 @@ private:
     QBrush stationBrush, stationBrushInner;
     QPen textPen;
     QFont textFont;
+    QPen segmentPen;
     qreal CAMERA_X, CAMERA_Y;
     QList<MetroStation> stations;
+    QList<MetroSegment> segments;
+
+    const int DEFAULT_SEGMENT_WIDTH = 8.0;
+
+    QRectF CAMERA_BOUND;
+
+    void calc_camera_bound();
 
 public:
     void paint(QPainter *painter, QPaintEvent *event);
@@ -36,7 +50,11 @@ public:
 
     void set_camera_pos(qreal x, qreal y);
 
-    void setStations(QList<MetroStation> stations);
+    void setStations(
+            QList<MetroStation> stations,
+            QList<MetroSegment> segments);
+
+    static QColor line_color_mapping(QString line);
 };
 
 

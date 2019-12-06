@@ -56,7 +56,7 @@ static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
         self.touchBarItem2.view = self.touchBarButton2;
         return self.touchBarItem2;
     } else if ([identifier isEqualToString:ButtonTabFlow]) {
-        QString title = "Flow";
+        QString title = "Flow Analysis";
         self.touchBarItem3 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
         self.touchBarButton3 = [[NSButton buttonWithTitle:title.toNSString() target:self
                                                    action:@selector(buttonTabFlowClicked)] autorelease];

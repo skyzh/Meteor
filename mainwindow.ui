@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -338,7 +338,7 @@
       </widget>
       <widget class="QWidget" name="tab_flow">
        <attribute name="title">
-        <string>Flow</string>
+        <string>Flow Analysis</string>
        </attribute>
       </widget>
      </widget>
@@ -377,7 +377,7 @@
   </action>
   <action name="actionFlow">
    <property name="text">
-    <string>Flow</string>
+    <string>Flow Analysis</string>
    </property>
   </action>
  </widget>
