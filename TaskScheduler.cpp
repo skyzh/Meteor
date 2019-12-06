@@ -169,19 +169,18 @@ void TaskScheduler::ready() {
 }
 
 void TaskScheduler::emit_message(QString msg) {
-    emit message(QString("(%3 of %4) %1%2")
+    emit message(QString("(%3%) %1%2")
                          .arg(current_task_name)
                          .arg(msg == "" ? "" : ": " + msg)
-                         .arg(task_cnt + 1)
-                         .arg(task_cnt_total)
+                         .arg(int(double(task_cnt + 1) / task_cnt_total * 100))
     );
 }
 
 void TaskScheduler::resolve(Task *task) {
     QList<Task *> dependencies = task->dependencies();
-    ++task_cnt_total;
     for (Task *dependency: dependencies) {
         resolve(dependency);
     }
     tasks << task;
+    ++task_cnt_total;
 }

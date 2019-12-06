@@ -72,17 +72,26 @@ void TaskQueryEntryExit::run() {
         auto _stt = start_time / time_div;
         auto _ett = end_time / time_div;
 
-        auto lst_time = _stt;
+        auto lst_time_0 = _stt;
+        auto lst_time_1 = _stt;
         while (q.next()) {
             auto time_block = q.value(0).toULongLong();
-            for (unsigned long long i = lst_time; i < time_block; i++) {
-                data << EntryExitResult{i * time_div, 0, 0};
-                data << EntryExitResult{i * time_div, 1, 0};
+            auto status = q.value(1).toULongLong();
+            if (status == 0) {
+                for (unsigned long long i = lst_time_0; i < time_block; i++) {
+                    data << EntryExitResult{i * time_div, 0, 0};
+                }
+                lst_time_0 = time_block + 1;
             }
-            lst_time = time_block + 1;
+            if (status == 1) {
+                for (unsigned long long i = lst_time_1; i < time_block; i++) {
+                    data << EntryExitResult{i * time_div, 1, 0};
+                }
+                lst_time_1 = time_block + 1;
+            }
             data << EntryExitResult{
-                    q.value(0).toULongLong() * time_div,
-                    q.value(1).toULongLong(),
+                    time_block * time_div,
+                    status,
                     q.value(2).toULongLong()
             };
         }

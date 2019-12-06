@@ -10,8 +10,10 @@ static QPointer <MainWindow> mainWindow;
 
 @property(strong) NSCustomTouchBarItem *touchBarItem1;
 @property(strong) NSCustomTouchBarItem *touchBarItem2;
+@property(strong) NSCustomTouchBarItem *touchBarItem3;
 @property(strong) NSButton *touchBarButton1;
 @property(strong) NSButton *touchBarButton2;
+@property(strong) NSButton *touchBarButton3;
 
 @property(strong) NSObject *qtDelegate;
 
@@ -19,6 +21,7 @@ static QPointer <MainWindow> mainWindow;
 
 static NSTouchBarItemIdentifier ButtonTabQuery = @"com.alexchi.ButtonTabQuery";
 static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTabRoutePlanning";
+static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
 
 @implementation TouchBarProvider
 
@@ -27,7 +30,10 @@ static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTab
     NSTouchBar *bar = [[NSTouchBar alloc] init];
     bar.delegate = self;
 
-    bar.defaultItemIdentifiers = @[ButtonTabQuery, ButtonTabRoutePlanning];
+    bar.defaultItemIdentifiers = @[
+            ButtonTabQuery,
+            ButtonTabRoutePlanning,
+            ButtonTabFlow];
 
     return bar;
 }
@@ -49,6 +55,13 @@ static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTab
                                                    action:@selector(buttonTabRoutePlanningClicked)] autorelease];
         self.touchBarItem2.view = self.touchBarButton2;
         return self.touchBarItem2;
+    } else if ([identifier isEqualToString:ButtonTabFlow]) {
+        QString title = "Flow";
+        self.touchBarItem3 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
+        self.touchBarButton3 = [[NSButton buttonWithTitle:title.toNSString() target:self
+                                                   action:@selector(buttonTabFlowClicked)] autorelease];
+        self.touchBarItem3.view = self.touchBarButton3;
+        return self.touchBarItem3;
     }
     return nil;
 }
@@ -76,7 +89,11 @@ static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTab
 }
 
 - (void)buttonTabRoutePlanningClicked {
-        QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabRoutePlanning_clicked);
+    QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabRoutePlanning_clicked);
+}
+
+- (void)buttonTabFlowClicked {
+    QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabFlow_clicked);
 }
 
 @end

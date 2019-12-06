@@ -4,6 +4,8 @@
 #include "TaskReadDataset.h"
 #include "TaskScheduler.h"
 #include "TaskQueryEntryExit.h"
+#include "MetroWidget.h"
+#include "MetroPainter.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -27,7 +29,6 @@ private slots:
 
     void message(QString msg);
 
-
 public:
     MainWindow(QWidget *parent = nullptr);
 
@@ -45,16 +46,28 @@ private:
 
     QChart *chart;
     QChartView *chartView;
+    MetroWidget *metroWidget;
+    MetroPainter metroPainter;
 
 private slots:
+
     void on_pushButtonRoutePlanning_clicked();
 
     void on_pushButtonQuery_clicked();
 
+    void on_actionPassenger_Traffic_triggered();
+
+    void on_actionRoute_Planning_triggered();
+
+    void on_actionFlow_triggered();
+
 public slots:
+
     void tb_buttonTabQuery_clicked();
 
     void tb_buttonTabRoutePlanning_clicked();
+
+    void tb_buttonTabFlow_clicked();
 };
 
 #endif // MAINWINDOW_H

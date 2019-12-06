@@ -32,6 +32,8 @@ public:
 
     QMutex _data_mutex;
 
+    static QList<qulonglong> plan_route(const QList<QList<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to);
+
 signals:
     void result();
 

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "TaskQueryEntryExit.h"
 #include "TaskPlanRoute.h"
+#include "MetroPainter.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -14,8 +15,6 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), scheduler(this) {
     ui->setupUi(this);
-    ui->tabWidget->setAutoFillBackground(true);
-    ui->tab_passenger_traffic->setAutoFillBackground(true);
     setup_status_bar();
     {
         QStringList list;
@@ -34,14 +33,21 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboLine->addItems(list);
     }
 
+    metroWidget = new MetroWidget(&metroPainter, this);
+    ui->layoutRoute->addWidget(metroWidget);
+
     connect(&scheduler, &TaskScheduler::progress, this, &MainWindow::progress);
     connect(&scheduler, &TaskScheduler::message, this, &MainWindow::message);
+
+    schedulerProgress->setValue(0);
     scheduler.start();
 }
 
 MainWindow::~MainWindow() {
     scheduler.quit();
     scheduler.wait();
+    ui->layoutRoute->removeWidget(metroWidget);
+    delete metroWidget;
     delete ui;
 }
 
@@ -100,13 +106,13 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
 
     connect(task, &TaskPlanRoute::result, [=]() {
         task->_data_mutex.lock();
-        QList <qulonglong> route = task->data;
+        QList<qulonglong> route = task->data;
         task->_data_mutex.unlock();
 
         QMetaObject::invokeMethod(this, [=]() {
             QString str;
             for (auto i : route) str += QString("%1 ->").arg(i);
-            ui->textRoute->setPlainText(str);
+            // ui->textRoute->setPlainText(str);
         });
     });
 }
@@ -115,8 +121,8 @@ void MainWindow::on_pushButtonQuery_clicked() {
     long long start = ui->fromTime->dateTime().toSecsSinceEpoch();
     long long end = ui->toTime->dateTime().toSecsSinceEpoch();
     long long time_div = 3600;
-    if (end - start <= 60 * 60 * 12) time_div = 1800;
-    if (end - start <= 60 * 60 * 1) time_div = 60;
+    if (end - start <= 60 * 60 * 12) time_div = 300;
+    if (end - start <= 60 * 60 * 1) time_div = 30;
     if (end - start <= 60) time_div = 1;
     TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
     task->args({
@@ -154,4 +160,20 @@ void MainWindow::tb_buttonTabQuery_clicked() {
 
 void MainWindow::tb_buttonTabRoutePlanning_clicked() {
     ui->tabWidget->setCurrentWidget(ui->tab_route_planning);
+}
+
+void MainWindow::tb_buttonTabFlow_clicked() {
+    ui->tabWidget->setCurrentWidget(ui->tab_flow);
+}
+
+void MainWindow::on_actionPassenger_Traffic_triggered() {
+    ui->tabWidget->setCurrentWidget(ui->tab_passenger_traffic);
+}
+
+void MainWindow::on_actionRoute_Planning_triggered() {
+    ui->tabWidget->setCurrentWidget(ui->tab_route_planning);
+}
+
+void MainWindow::on_actionFlow_triggered() {
+    ui->tabWidget->setCurrentWidget(ui->tab_flow);
 }

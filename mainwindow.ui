@@ -32,8 +32,23 @@
       <property name="styleSheet">
        <string notr="true"/>
       </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::South</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
       <property name="currentIndex">
        <number>1</number>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>false</bool>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="tab_passenger_traffic">
        <attribute name="title">
@@ -272,6 +287,12 @@
              </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="comboRouteFrom">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="editable">
                 <bool>true</bool>
                </property>
@@ -307,7 +328,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QFrame" name="frame">
+         <widget class="QFrame" name="frameRoute">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -320,14 +341,15 @@
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="0">
-            <widget class="QPlainTextEdit" name="textRoute"/>
-           </item>
-          </layout>
+          <layout class="QGridLayout" name="layoutRoute"/>
          </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="tab_flow">
+       <attribute name="title">
+        <string>Flow</string>
+       </attribute>
       </widget>
      </widget>
     </item>
@@ -342,8 +364,32 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuViews">
+    <property name="title">
+     <string>Views</string>
+    </property>
+    <addaction name="actionPassenger_Traffic"/>
+    <addaction name="actionRoute_Planning"/>
+    <addaction name="actionFlow"/>
+   </widget>
+   <addaction name="menuViews"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionPassenger_Traffic">
+   <property name="text">
+    <string>Passenger Traffic</string>
+   </property>
+  </action>
+  <action name="actionRoute_Planning">
+   <property name="text">
+    <string>Route Planning</string>
+   </property>
+  </action>
+  <action name="actionFlow">
+   <property name="text">
+    <string>Flow</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

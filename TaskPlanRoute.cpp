@@ -22,7 +22,8 @@ struct Route {
     qlonglong parent;
 };
 
-static QList<qulonglong> plan_route(const QList<QList<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
+QList<qulonglong> TaskPlanRoute::plan_route(const QList<QList<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
+    if (from < 0 || to < 0 || from >= N || to >= N) return QList<qulonglong>();
     if (from == to) return QList<qulonglong>();
 
     QList<qulonglong> route;

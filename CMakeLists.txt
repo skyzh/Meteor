@@ -36,6 +36,6 @@ add_executable(Meteor
         TaskAddTimestamp.h
         TaskInitDatabase.cpp
         TaskInitDatabase.h
-        main.mm TaskPlanRoute.cpp TaskPlanRoute.h ConfigManager.cpp ConfigManager.h)
+        main.mm TaskPlanRoute.cpp TaskPlanRoute.h ConfigManager.cpp ConfigManager.h MetroWidget.cpp MetroWidget.h MetroPainter.cpp MetroPainter.h)
 
 target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
