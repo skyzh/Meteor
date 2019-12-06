@@ -13,8 +13,6 @@ public:
 
     bool journal() override;
 
-    QStringList dependencies() override;
-
     void run() override;
 
     QString name() override;

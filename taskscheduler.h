@@ -15,6 +15,7 @@ Q_OBJECT
     QList<Task *> tasks;
     bool task_running;
     QString current_task_name;
+    int task_cnt, task_cnt_total;
 
     void _schedule();
 
@@ -25,6 +26,10 @@ Q_OBJECT
     bool do_journal(QString journal_id);
 
     void ready();
+
+    void emit_message(QString msg = "");
+
+    void resolve(Task* task);
 
 signals:
 

@@ -9,7 +9,9 @@
 #include <QSqlError>
 #include <QDateTime>
 
-TaskScheduler::TaskScheduler(QObject *parent) : QThread(parent), task_running(false) {
+TaskScheduler::TaskScheduler(QObject *parent)
+        : QThread(parent), task_running(false),
+          task_cnt(0), task_cnt_total(0) {
 
 }
 
@@ -33,6 +35,7 @@ bool TaskScheduler::do_journal(QString journal_id) {
         emit message(QString("SQL Error: %1").arg(q.lastError().text()));
         return false;
     }
+    qDebug() << journal_id << " journaled";
     return true;
 }
 
@@ -67,7 +70,7 @@ bool TaskScheduler::is_journaled(QString journal_id) {
 void TaskScheduler::run() {
     if (!init_journal()) return;
     QEventLoop loop;
-    ready();
+    do_schedule();
     loop.exec();
     if (task_running) {
         auto task = tasks.first();
@@ -98,7 +101,6 @@ bool TaskScheduler::init_journal() {
 }
 
 void TaskScheduler::_schedule() {
-    QMutexLocker l(&_tasks_mutex);
     if (task_running) return;
     while (!tasks.empty()) {
         auto task = tasks.first();
@@ -117,16 +119,17 @@ void TaskScheduler::_schedule() {
     connect(task, &Task::message, this, &TaskScheduler::on_message);
     connect(task, &Task::success, this, &TaskScheduler::on_success);
     current_task_name = task->display_name();
-    emit message(current_task_name);
+    emit_message();
     emit progress(0.0);
     task->start();
 }
 
 void TaskScheduler::schedule(Task *task) {
-    _tasks_mutex.lock();
-    connect(task, &Task::finished, task, &QObject::deleteLater);
-    tasks.push_back(task);
-    _tasks_mutex.unlock();
+    {
+        QMutexLocker l(&_tasks_mutex);
+        connect(task, &Task::finished, task, &QObject::deleteLater);
+        resolve(task);
+    }
     QMetaObject::invokeMethod(this, &TaskScheduler::do_schedule);
 }
 
@@ -139,24 +142,45 @@ void TaskScheduler::on_progress(qreal percent) {
 }
 
 void TaskScheduler::on_message(QString msg) {
-    emit message(QString("%1: %2").arg(current_task_name).arg(msg));
+    emit_message(msg);
 }
 
 void TaskScheduler::on_success(bool ok) {
-    _tasks_mutex.lock();
+    QMutexLocker l(&_tasks_mutex);
     auto task = tasks.first();
     if (task->journal()) do_journal(task->name());
     tasks.pop_front();
     task_running = false;
-    _tasks_mutex.unlock();
+    ++task_cnt;
     if (ok) _schedule();
 }
 
 void TaskScheduler::do_schedule() {
+    QMutexLocker l(&_tasks_mutex);
     _schedule();
 }
 
 void TaskScheduler::ready() {
     emit message("Ready");
     emit progress(1.0);
+    task_cnt_total = 0;
+    task_cnt = 0;
+}
+
+void TaskScheduler::emit_message(QString msg) {
+    emit message(QString("(%3 of %4) %1%2")
+                         .arg(current_task_name)
+                         .arg(msg == "" ? "" : ": " + msg)
+                         .arg(task_cnt + 1)
+                         .arg(task_cnt_total)
+    );
+}
+
+void TaskScheduler::resolve(Task *task) {
+    QList<Task*> dependencies = task->dependencies();
+    ++task_cnt_total;
+    tasks.push_front(task);
+    foreach(Task* dependency, dependencies) {
+        resolve(dependency);
+    }
 }

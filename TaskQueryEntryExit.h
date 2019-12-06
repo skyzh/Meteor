@@ -15,12 +15,17 @@ private:
     long long start_time;
     long long end_time;
     long long time_div;
+    bool query_all;
+    long long station_id;
+    QString line_id;
 public:
     TaskQueryEntryExit(QObject *parent = nullptr);
 
     void run() override;
 
     QString name() override;
+
+    QList<Task*> dependencies() override;
 
     QString display_name() override;
 

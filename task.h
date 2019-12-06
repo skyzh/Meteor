@@ -5,6 +5,7 @@
 #include <QSqlQuery>
 #include <QVariantList>
 #include <QVariant>
+#include <QList>
 
 class Task : public QThread {
 Q_OBJECT
@@ -22,7 +23,7 @@ public:
 
     virtual bool journal();
 
-    virtual QStringList dependencies();
+    virtual QList<Task*> dependencies();
 
     virtual QString name();
 

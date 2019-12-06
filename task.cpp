@@ -9,8 +9,8 @@ bool Task::journal() {
     return false;
 }
 
-QStringList Task::dependencies() {
-    return QStringList();
+QList<Task*> Task::dependencies() {
+    return QList<Task*>();
 }
 
 QString Task::name() {

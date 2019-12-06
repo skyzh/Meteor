@@ -4,6 +4,9 @@
 #include "Task.h"
 
 class TaskReadDataset : public Task {
+private:
+    QString at_date;
+
 public:
     TaskReadDataset(QObject *parent = nullptr);
 
@@ -16,6 +19,11 @@ public:
     QString display_name() override;
 
     ~TaskReadDataset() override;
+
+    QList<Task *> dependencies() override;
+
+protected:
+    bool parse_args() override;
 };
 
 #endif // TASKREADDATASET_H

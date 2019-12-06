@@ -94,7 +94,3 @@ QString TaskAddTimestamp::display_name() {
 TaskAddTimestamp::~TaskAddTimestamp() {
 
 }
-
-QStringList TaskAddTimestamp::dependencies() {
-    return {"read_dataset"};
-}
