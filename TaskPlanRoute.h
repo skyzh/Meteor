@@ -15,6 +15,10 @@ class TaskPlanRoute : public Task {
 private:
     unsigned long long from, to;
 
+    QList<qulonglong> data;
+
+    QMutex _data_mutex;
+
 public:
     TaskPlanRoute(QObject *parent = nullptr);
 
@@ -28,9 +32,7 @@ public:
 
     ~TaskPlanRoute() override;
 
-    QList<qulonglong> data;
-
-    QMutex _data_mutex;
+    QList<qulonglong> get_data();
 
     static QList<qulonglong> plan_route(const QList<QList<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to);
 

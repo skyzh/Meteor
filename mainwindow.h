@@ -6,6 +6,8 @@
 #include "TaskQueryEntryExit.h"
 #include "MetroWidget.h"
 #include "MetroPainter.h"
+#include "TaskPlanRoute.h"
+#include "TaskGetMapping.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -48,6 +50,10 @@ private:
     QChartView *chartView;
     MetroWidget *metroWidget;
     MetroPainter metroPainter;
+
+    QList<TaskGetMapping::Mapping> station_mapping;
+
+    void load_station_mapping();
 
 private slots:
 

@@ -7,8 +7,8 @@
 
 void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     const qreal STATION_CIRCLE_RADIUS = 10;
-    const qreal STATION_CIRCLE_INNER_RADIUS = 7;
-    const qreal STATION_NAME_MARGIN = 10;
+    const qreal STATION_CIRCLE_INNER_RADIUS = 6;
+    const qreal STATION_NAME_MARGIN = 5;
 
     painter->save();
 
@@ -43,9 +43,13 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     painter->setPen(textPen);
     painter->setFont(textFont);
     for (auto &&station : stations) {
-        QPointF pos = QPointF(station.x + CAMERA_OFFSET_X,
-                              station.y + STATION_CIRCLE_RADIUS + STATION_NAME_MARGIN + CAMERA_OFFSET_Y);
-        painter->drawText(pos, QStringLiteral("test"));
+        QRect pos = QRect(station.x + CAMERA_OFFSET_X - 100,
+                          station.y + STATION_CIRCLE_RADIUS + STATION_NAME_MARGIN + CAMERA_OFFSET_Y,
+                          200,
+                          80);
+        painter->drawText(pos,
+                          Qt::AlignHCenter | Qt::AlignTop,
+                          station.name);
     }
 
     painter->restore();

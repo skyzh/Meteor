@@ -125,19 +125,6 @@ void TaskScheduler::_schedule() {
     task->start();
 }
 
-void TaskScheduler::schedule(Task *task) {
-    {
-        QMutexLocker l(&_tasks_mutex);
-        connect(task, &Task::finished, task, &QObject::deleteLater);
-        resolve(task);
-    }
-    QMetaObject::invokeMethod(this, &TaskScheduler::do_schedule);
-}
-
-void TaskScheduler::schedule(QString task, QVariantList args) {
-    schedule(Task::get_from_factory(task, args, this));
-}
-
 void TaskScheduler::on_progress(qreal percent) {
     emit progress(percent);
 }
@@ -166,6 +153,15 @@ void TaskScheduler::ready() {
     emit progress(1.0);
     task_cnt_total = 0;
     task_cnt = 0;
+}
+
+void TaskScheduler::schedule(Task *task) {
+    {
+        QMutexLocker l(&_tasks_mutex);
+        connect(task, &Task::finished, task, &QObject::deleteLater);
+        resolve(task);
+    }
+    QMetaObject::invokeMethod(this, &TaskScheduler::do_schedule);
 }
 
 void TaskScheduler::emit_message(QString msg) {

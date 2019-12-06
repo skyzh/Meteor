@@ -54,8 +54,6 @@ public:
 
     void schedule(Task *task);
 
-    void schedule(QString task, QVariantList args = QVariantList());
-
     ~TaskScheduler() override;
 };
 

@@ -24,7 +24,6 @@ add_executable(Meteor
         Task.h
         TaskDelay.cpp
         TaskDelay.h
-        TaskFactory.cpp
         TaskReadDataset.cpp
         TaskReadDataset.h
         TaskScheduler.cpp
@@ -36,6 +35,6 @@ add_executable(Meteor
         TaskAddTimestamp.h
         TaskInitDatabase.cpp
         TaskInitDatabase.h
-        main.mm TaskPlanRoute.cpp TaskPlanRoute.h ConfigManager.cpp ConfigManager.h MetroWidget.cpp MetroWidget.h MetroPainter.cpp MetroPainter.h)
+        main.mm TaskPlanRoute.cpp TaskPlanRoute.h ConfigManager.cpp ConfigManager.h MetroWidget.cpp MetroWidget.h MetroPainter.cpp MetroPainter.h TaskGetMapping.cpp TaskGetMapping.h)
 
 target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")

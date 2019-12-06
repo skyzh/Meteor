@@ -33,8 +33,6 @@ public:
 
     void cancel();
 
-    static Task *get_from_factory(QString task, QVariantList args = QVariantList(), QObject *parent = nullptr);
-
 protected:
     std::atomic<bool> _cancel;
 

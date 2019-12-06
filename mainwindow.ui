@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -143,11 +143,6 @@
                <property name="editable">
                 <bool>true</bool>
                </property>
-               <item>
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item row="0" column="2">
@@ -172,13 +167,8 @@
                 <bool>true</bool>
                </property>
                <property name="currentText">
-                <string>All</string>
+                <string/>
                </property>
-               <item>
-                <property name="text">
-                 <string>All</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item row="0" column="0">

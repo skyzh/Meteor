@@ -1,8 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "TaskQueryEntryExit.h"
-#include "TaskPlanRoute.h"
-#include "MetroPainter.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -16,21 +13,16 @@ MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), scheduler(this) {
     ui->setupUi(this);
     setup_status_bar();
+    ui->comboStation->addItem("All", "All");
     {
         QStringList list;
-        for (int i = 0; i <= 80; i++) {
-            list << QString("%1").arg(i);
-        }
-        ui->comboStation->addItems(list);
-        ui->comboRouteFrom->addItems(list);
-        ui->comboRouteTo->addItems(list);
-    }
-    {
-        QStringList list;
-        for (int i = 'A'; i <= 'C'; i++) {
-            list << QString(i);
-        }
-        ui->comboLine->addItems(list);
+        list << "B - Line 1"; // 202 45 92
+        list << "A - Line 4"; // 130 192 90
+        list << "C - Line 2"; // 240 136 62
+        ui->comboLine->addItem("All", "All");
+        ui->comboLine->addItem("A - Line 4", "A");
+        ui->comboLine->addItem("B - Line 1", "B");
+        ui->comboLine->addItem("C - Line 2", "C");
     }
 
     metroWidget = new MetroWidget(&metroPainter, this);
@@ -41,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     schedulerProgress->setValue(0);
     scheduler.start();
+
+    load_station_mapping();
 }
 
 MainWindow::~MainWindow() {
@@ -101,13 +95,11 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
 
 void MainWindow::on_pushButtonRoutePlanning_clicked() {
     auto task = new TaskPlanRoute(this);
-    task->args({ui->comboRouteFrom->currentText(), ui->comboRouteTo->currentText()});
+    task->args({ui->comboRouteFrom->currentData(), ui->comboRouteTo->currentData()});
     scheduler.schedule(task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
-        task->_data_mutex.lock();
-        QList<qulonglong> route = task->data;
-        task->_data_mutex.unlock();
+        QList<qulonglong> route = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
             QString str;
@@ -129,14 +121,12 @@ void MainWindow::on_pushButtonQuery_clicked() {
                        time_div,
                        start,
                        end,
-                       ui->comboLine->currentText(),
-                       ui->comboStation->currentText()
+                       ui->comboLine->currentData(),
+                       ui->comboStation->currentData()
                });
 
     connect(task, &TaskQueryEntryExit::result, [=]() {
-        task->_data_mutex.lock();
-        QList<TaskQueryEntryExit::EntryExitResult> data = task->data;
-        task->_data_mutex.unlock();
+        QList<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
             QLineSeries *in_series = new QLineSeries;
@@ -176,4 +166,37 @@ void MainWindow::on_actionRoute_Planning_triggered() {
 
 void MainWindow::on_actionFlow_triggered() {
     ui->tabWidget->setCurrentWidget(ui->tab_flow);
+}
+
+void MainWindow::load_station_mapping() {
+    TaskGetMapping *task = new TaskGetMapping(this);
+    connect(task, &TaskGetMapping::result, [=]() {
+        QList<TaskGetMapping::Mapping> data = task->get_data();
+
+        QMetaObject::invokeMethod(this, [=]() {
+            this->station_mapping = data;
+            QList<MetroStation> stations;
+            int q = 0;
+            for (auto &&mapping: data) {
+                QString station = QString("(%3)%1 - %2")
+                        .arg(mapping.stationID)
+                        .arg(mapping.name)
+                        .arg(mapping.lineID);
+                ui->comboStation->addItem(station, mapping.stationID);
+                ui->comboRouteFrom->addItem(station, mapping.stationID);
+                ui->comboRouteTo->addItem(station, mapping.stationID);
+                if (mapping.lineID == "A") {
+                    stations << MetroStation {
+                        mapping.name,
+                        mapping.stationID,
+                        (q++) * 150.0,
+                        0
+                    };
+                }
+            }
+            metroWidget->setStations(stations);
+        });
+    });
+    scheduler.schedule(task);
+
 }

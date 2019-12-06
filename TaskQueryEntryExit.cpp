@@ -143,3 +143,8 @@ QList<Task *> TaskQueryEntryExit::dependencies() {
     }
     return dependencies;
 }
+
+QList<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {
+    QMutexLocker l(&_data_mutex);
+    return data;
+}

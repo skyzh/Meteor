@@ -37,4 +37,5 @@ void MetroWidget::wheelEvent(QWheelEvent *event) {
 
 void MetroWidget::setStations(QList<MetroStation> stations) {
     helper->setStations(stations);
+    update();
 }

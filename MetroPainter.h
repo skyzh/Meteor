@@ -12,7 +12,7 @@
 
 struct MetroStation {
     QString name;
-    qlonglong id;
+    qulonglong id;
     qreal x, y;
 };
 

@@ -110,3 +110,8 @@ bool TaskPlanRoute::parse_args() {
     to = get_arg(1).toULongLong();
     return true;
 }
+
+QList<qulonglong> TaskPlanRoute::get_data() {
+    QMutexLocker l(&_data_mutex);
+    return data;
+}

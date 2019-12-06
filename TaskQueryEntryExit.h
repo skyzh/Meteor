@@ -9,14 +9,8 @@
 #include <QObject>
 
 class TaskQueryEntryExit : public Task {
-    Q_OBJECT
+Q_OBJECT
 
-private:
-    long long start_time;
-    long long end_time;
-    long long time_div;
-    long long station_id;
-    QString line_id;
 public:
     TaskQueryEntryExit(QObject *parent = nullptr);
 
@@ -24,7 +18,7 @@ public:
 
     QString name() override;
 
-    QList<Task*> dependencies() override;
+    QList<Task *> dependencies() override;
 
     QString display_name() override;
 
@@ -36,10 +30,20 @@ public:
         unsigned long long count;
     };
 
+    QList<EntryExitResult> get_data();
+
+private:
+    long long start_time;
+    long long end_time;
+    long long time_div;
+    long long station_id;
+    QString line_id;
+
     QMutex _data_mutex;
     QList<EntryExitResult> data;
 
 signals:
+
     void result();
 
 protected:
