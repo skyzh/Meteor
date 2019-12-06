@@ -1,0 +1,43 @@
+//
+// Created by Alex Chi on 2019/12/06.
+//
+
+#ifndef METRO_TASKPLANROUTE_H
+#define METRO_TASKPLANROUTE_H
+
+#include "Task.h"
+
+#include <QMutex>
+
+class TaskPlanRoute : public Task {
+    Q_OBJECT
+
+private:
+    unsigned long long from, to;
+
+public:
+    TaskPlanRoute(QObject *parent = nullptr);
+
+    bool journal() override;
+
+    void run() override;
+
+    QString name() override;
+
+    QString display_name() override;
+
+    ~TaskPlanRoute() override;
+
+    QList<qulonglong> data;
+
+    QMutex _data_mutex;
+
+signals:
+    void result();
+
+protected:
+    bool parse_args() override;
+};
+
+
+#endif //METRO_TASKPLANROUTE_H

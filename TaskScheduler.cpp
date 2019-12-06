@@ -183,5 +183,5 @@ void TaskScheduler::resolve(Task *task) {
     for (Task *dependency: dependencies) {
         resolve(dependency);
     }
-    tasks.push_back(task);
+    tasks << task;
 }

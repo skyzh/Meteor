@@ -43,22 +43,18 @@ private:
 
     void setup_chart(QList<QLineSeries *> series);
 
-    QList<TaskQueryEntryExit::EntryExitResult> data;
     QChart *chart;
     QChartView *chartView;
 
 private slots:
-
-    void update_chart();
-
     void on_pushButtonRoutePlanning_clicked();
 
     void on_pushButtonQuery_clicked();
 
 public slots:
-    void on_buttonTabQuery_clicked();
+    void tb_buttonTabQuery_clicked();
 
-    void on_buttonTabRoutePlanning_clicked();
+    void tb_buttonTabRoutePlanning_clicked();
 };
 
 #endif // MAINWINDOW_H

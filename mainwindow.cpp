@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "TaskQueryEntryExit.h"
+#include "TaskPlanRoute.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -92,21 +93,22 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
     chart->setBackgroundRoundness(0);
 }
 
-void MainWindow::update_chart() {
-    QLineSeries *in_series = new QLineSeries;
-    QLineSeries *out_series = new QLineSeries;
-
-    for (auto &&record : data) {
-        if (record.status == 0)
-            in_series->append(record.timestamp * 1000, record.count);
-        if (record.status == 1)
-            out_series->append(record.timestamp * 1000, record.count);
-    }
-    this->setup_chart({in_series, out_series});
-}
-
 void MainWindow::on_pushButtonRoutePlanning_clicked() {
+    auto task = new TaskPlanRoute(this);
+    task->args({ui->comboRouteFrom->currentText(), ui->comboRouteTo->currentText()});
+    scheduler.schedule(task);
 
+    connect(task, &TaskPlanRoute::result, [=]() {
+        task->_data_mutex.lock();
+        QList <qulonglong> route = task->data;
+        task->_data_mutex.unlock();
+
+        QMetaObject::invokeMethod(this, [=]() {
+            QString str;
+            for (auto i : route) str += QString("%1 ->").arg(i);
+            ui->textRoute->setPlainText(str);
+        });
+    });
 }
 
 void MainWindow::on_pushButtonQuery_clicked() {
@@ -124,18 +126,32 @@ void MainWindow::on_pushButtonQuery_clicked() {
                        ui->comboLine->currentText(),
                        ui->comboStation->currentText()
                });
+
     connect(task, &TaskQueryEntryExit::result, [=]() {
-        QMutexLocker l(&task->_data_mutex);
-        this->data = task->data;
-        QMetaObject::invokeMethod(this, &MainWindow::update_chart);
+        task->_data_mutex.lock();
+        QList<TaskQueryEntryExit::EntryExitResult> data = task->data;
+        task->_data_mutex.unlock();
+
+        QMetaObject::invokeMethod(this, [=]() {
+            QLineSeries *in_series = new QLineSeries;
+            QLineSeries *out_series = new QLineSeries;
+
+            for (auto &&record : data) {
+                if (record.status == 0)
+                    in_series->append(record.timestamp * 1000, record.count);
+                if (record.status == 1)
+                    out_series->append(record.timestamp * 1000, record.count);
+            }
+            setup_chart({in_series, out_series});
+        });
     });
     scheduler.schedule(task);
 }
 
-void MainWindow::on_buttonTabQuery_clicked() {
+void MainWindow::tb_buttonTabQuery_clicked() {
     ui->tabWidget->setCurrentWidget(ui->tab_passenger_traffic);
 }
 
-void MainWindow::on_buttonTabRoutePlanning_clicked() {
+void MainWindow::tb_buttonTabRoutePlanning_clicked() {
     ui->tabWidget->setCurrentWidget(ui->tab_route_planning);
 }

@@ -72,11 +72,11 @@ static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTab
 }
 
 - (void)buttonTabQueryClicked {
-    QMetaObject::invokeMethod(mainWindow, &MainWindow::on_buttonTabQuery_clicked);
+        QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabQuery_clicked);
 }
 
 - (void)buttonTabRoutePlanningClicked {
-    QMetaObject::invokeMethod(mainWindow, &MainWindow::on_buttonTabRoutePlanning_clicked);
+        QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabRoutePlanning_clicked);
 }
 
 @end

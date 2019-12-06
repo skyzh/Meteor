@@ -1,5 +1,6 @@
 #include "TaskReadDataset.h"
 #include "TaskInitDatabase.h"
+#include "ConfigManager.h"
 #include "db.h"
 
 #include <QSqlQuery>
@@ -38,13 +39,15 @@ void TaskReadDataset::run() {
     QSqlQuery q(db);
 
     // [0] Listing all files under dataset path
-    const QString DATASET_PATH = "/Users/skyzh/Work/Qt/dataset_CS241/dataset/";
+    const QString DATASET_PATH =
+            QString("%1/dataset/").arg(ConfigManager::instance()->get("DATASET_PATH").toString());
     QDir directory(DATASET_PATH);
     QStringList _datasets = directory.entryList(QStringList() << "*.csv" << "*.CSV", QDir::Files);
     QStringList datasets;
     QString filename_prefix = QString("record_%1").arg(at_date);
     for (auto &&dataset : _datasets) {
-        if (dataset.startsWith(filename_prefix)) datasets.push_back(dataset);
+        if (dataset.startsWith(filename_prefix))
+            datasets << dataset;
     }
 
     int cnt = 0;

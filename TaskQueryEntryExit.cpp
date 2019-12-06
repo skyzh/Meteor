@@ -76,15 +76,15 @@ void TaskQueryEntryExit::run() {
         while (q.next()) {
             auto time_block = q.value(0).toULongLong();
             for (unsigned long long i = lst_time; i < time_block; i++) {
-                data.push_back(EntryExitResult{i * time_div, 0, 0});
-                data.push_back(EntryExitResult{i * time_div, 1, 0});
+                data << EntryExitResult{i * time_div, 0, 0};
+                data << EntryExitResult{i * time_div, 1, 0};
             }
             lst_time = time_block + 1;
-            data.push_back(EntryExitResult{
+            data << EntryExitResult{
                     q.value(0).toULongLong() * time_div,
                     q.value(1).toULongLong(),
                     q.value(2).toULongLong()
-            });
+            };
         }
     }
 
@@ -130,7 +130,7 @@ QList<Task *> TaskQueryEntryExit::dependencies() {
         QString date = timestamp.toString("yyyy-MM-dd");
         TaskReadDataset *task = new TaskReadDataset(parent());
         task->args({date});
-        dependencies.push_back(task);
+        dependencies << task;
     }
     return dependencies;
 }
