@@ -131,3 +131,11 @@ void MainWindow::on_pushButtonQuery_clicked() {
     });
     scheduler.schedule(task);
 }
+
+void MainWindow::on_buttonTabQuery_clicked() {
+    ui->tabWidget->setCurrentWidget(ui->tab_passenger_traffic);
+}
+
+void MainWindow::on_buttonTabRoutePlanning_clicked() {
+    ui->tabWidget->setCurrentWidget(ui->tab_route_planning);
+}

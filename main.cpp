@@ -1,17 +1,15 @@
 #include "mainwindow.h"
 
-#include <QApplication>
-#include <QSqlDatabase>
 #include "db.h"
 
-int main(int argc, char *argv[])
-{
+#include <QApplication>
+#include <QPointer>
+
+QPointer<MainWindow> run_application(int argc, char *argv[]) {
     DB::init();
-    
-    QApplication a(argc, argv);
 
-    MainWindow w;
-    w.show();
+    QPointer<MainWindow> w = QPointer<MainWindow>(new MainWindow);
+    w->show();
 
-    return a.exec();
+    return w;
 }

@@ -54,6 +54,11 @@ private slots:
     void on_pushButtonRoutePlanning_clicked();
 
     void on_pushButtonQuery_clicked();
+
+public slots:
+    void on_buttonTabQuery_clicked();
+
+    void on_buttonTabRoutePlanning_clicked();
 };
 
 #endif // MAINWINDOW_H

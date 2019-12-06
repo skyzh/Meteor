@@ -29,6 +29,13 @@ add_executable(Meteor
         TaskReadDataset.h
         TaskScheduler.cpp
         TaskScheduler.h
-        mainwindow.ui TaskQueryEntryExit.cpp TaskQueryEntryExit.h TaskAddTimestamp.cpp TaskAddTimestamp.h TaskInitDatabase.cpp TaskInitDatabase.h)
+        mainwindow.ui
+        TaskQueryEntryExit.cpp
+        TaskQueryEntryExit.h
+        TaskAddTimestamp.cpp
+        TaskAddTimestamp.h
+        TaskInitDatabase.cpp
+        TaskInitDatabase.h
+        main.mm)
 
-target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts)
+target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
