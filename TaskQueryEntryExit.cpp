@@ -12,12 +12,6 @@
 #include <QDateTime>
 #include <QDebug>
 
-QString get_timestamp_str(unsigned int tsp) {
-    QDateTime timestamp;
-    timestamp.setTime_t(tsp);
-    return timestamp.toString(Qt::SystemLocaleShortDate);
-}
-
 TaskQueryEntryExit::TaskQueryEntryExit(QObject *parent) : Task(parent) {
 
 }
@@ -102,7 +96,6 @@ void TaskQueryEntryExit::run() {
     emit success(true);
 
     db.close();
-
 }
 
 QString TaskQueryEntryExit::name() {
@@ -132,16 +125,7 @@ bool TaskQueryEntryExit::parse_args() {
 }
 
 QList<Task *> TaskQueryEntryExit::dependencies() {
-    QList<Task *> dependencies;
-    for (long long time = start_time; time < end_time; time += 86400) {
-        QDateTime timestamp;
-        timestamp.setTime_t(time);
-        QString date = timestamp.toString("yyyy-MM-dd");
-        TaskReadDataset *task = new TaskReadDataset(parent());
-        task->args({date});
-        dependencies << task;
-    }
-    return dependencies;
+    return TaskReadDataset::from_time_range(start_time, end_time, this);
 }
 
 QList<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {

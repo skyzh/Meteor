@@ -22,6 +22,8 @@ public:
 
     QList<Task *> dependencies() override;
 
+    static QList<Task *> from_time_range(qulonglong start_time, qulonglong end_time, QObject *parent);
+
 protected:
     bool parse_args() override;
 };

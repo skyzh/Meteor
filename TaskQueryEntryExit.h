@@ -43,7 +43,6 @@ private:
     QList<EntryExitResult> data;
 
 signals:
-
     void result();
 
 protected:

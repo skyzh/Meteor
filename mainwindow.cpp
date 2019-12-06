@@ -188,19 +188,19 @@ void MainWindow::load_station_mapping() {
                 ui->comboRouteFrom->addItem(station, mapping.stationID);
                 ui->comboRouteTo->addItem(station, mapping.stationID);
                 if (mapping.lineID == "A") {
-                    auto station = MetroStation {
-                        mapping.name,
-                        mapping.stationID,
-                        (q++) * 150.0,
-                        0,
-                        mapping.lineID
+                    auto station = MetroStation{
+                            mapping.name,
+                            mapping.stationID,
+                            (q++) * 150.0,
+                            0,
+                            mapping.lineID
                     };
                     if (!stations.empty()) {
                         auto lst_station = stations.last();
-                        segments << MetroSegment {
-                            lst_station.x, lst_station.y,
-                            station.x, station.y,
-                            mapping.lineID
+                        segments << MetroSegment{
+                                lst_station.x, lst_station.y,
+                                station.x, station.y,
+                                mapping.lineID
                         };
                     }
                     stations << station;
@@ -211,4 +211,10 @@ void MainWindow::load_station_mapping() {
     });
     scheduler.schedule(task);
 
+}
+
+void MainWindow::on_pushButtonFlow_clicked() {
+    TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
+    task->args({1546995600, 1546995600 + 86400});
+    scheduler.schedule(task);
 }

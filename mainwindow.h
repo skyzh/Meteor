@@ -8,6 +8,7 @@
 #include "MetroPainter.h"
 #include "TaskPlanRoute.h"
 #include "TaskGetMapping.h"
+#include "TaskFlowAnalysis.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -66,6 +67,8 @@ private slots:
     void on_actionRoute_Planning_triggered();
 
     void on_actionFlow_triggered();
+
+    void on_pushButtonFlow_clicked();
 
 public slots:
 

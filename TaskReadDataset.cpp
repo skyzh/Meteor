@@ -106,16 +106,15 @@ void TaskReadDataset::run() {
 
     if (_cancel) {
         db.rollback();
+        emit success(false);
     } else {
         emit message("Commiting changes");
         if (!db.commit()) {
             emit_db_error("Failed to commit", db);
             return;
         }
+        emit success(true);
     }
-
-    emit success(true);
-
     db.close();
 }
 
@@ -128,4 +127,17 @@ bool TaskReadDataset::parse_args() {
 
 QList<Task *> TaskReadDataset::dependencies() {
     return {new TaskInitDatabase};
+}
+
+QList<Task *> TaskReadDataset::from_time_range(qulonglong start_time, qulonglong end_time, QObject *parent) {
+    QList<Task *> dependencies;
+    for (unsigned long long time = start_time; time < end_time; time += 86400) {
+        QDateTime timestamp;
+        timestamp.setTime_t(time);
+        QString date = timestamp.toString("yyyy-MM-dd");
+        TaskReadDataset *task = new TaskReadDataset(parent);
+        task->args({date});
+        dependencies << task;
+    }
+    return dependencies;
 }

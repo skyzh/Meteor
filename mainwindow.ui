@@ -340,6 +340,19 @@
        <attribute name="title">
         <string>Flow Analysis</string>
        </attribute>
+       <widget class="QPushButton" name="pushButtonFlow">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>140</y>
+          <width>112</width>
+          <height>32</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Flow</string>
+        </property>
+       </widget>
       </widget>
      </widget>
     </item>
