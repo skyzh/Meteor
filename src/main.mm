@@ -4,16 +4,18 @@
 #include <QMetaObject>
 #import <AppKit/AppKit.h>
 
-static QPointer <MainWindow> mainWindow;
+static QPointer<MainWindow> mainWindow;
 
 @interface TouchBarProvider : NSResponder <NSTouchBarDelegate, NSApplicationDelegate, NSWindowDelegate>
 
 @property(strong) NSCustomTouchBarItem *touchBarItem1;
 @property(strong) NSCustomTouchBarItem *touchBarItem2;
 @property(strong) NSCustomTouchBarItem *touchBarItem3;
+@property(strong) NSCustomTouchBarItem *touchBarItem4;
 @property(strong) NSButton *touchBarButton1;
 @property(strong) NSButton *touchBarButton2;
 @property(strong) NSButton *touchBarButton3;
+@property(strong) NSSlider *touchBarSliderFlow;
 
 @property(strong) NSObject *qtDelegate;
 
@@ -22,6 +24,7 @@ static QPointer <MainWindow> mainWindow;
 static NSTouchBarItemIdentifier ButtonTabQuery = @"com.alexchi.ButtonTabQuery";
 static NSTouchBarItemIdentifier ButtonTabRoutePlanning = @"com.alexchi.ButtonTabRoutePlanning";
 static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
+static NSTouchBarItemIdentifier SliderFlow = @"com.alexchi.SliderFlow";
 
 @implementation TouchBarProvider
 
@@ -33,7 +36,8 @@ static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
     bar.defaultItemIdentifiers = @[
             ButtonTabQuery,
             ButtonTabRoutePlanning,
-            ButtonTabFlow];
+            ButtonTabFlow,
+            SliderFlow];
 
     return bar;
 }
@@ -42,26 +46,35 @@ static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
     Q_UNUSED(touchBar);
 
     if ([identifier isEqualToString:ButtonTabQuery]) {
-        QString title = "Passenger Traffic";
+        QString title = "Traffic";
         self.touchBarItem1 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
         self.touchBarButton1 = [[NSButton buttonWithTitle:title.toNSString() target:self
                                                    action:@selector(buttonTabQueryClicked)] autorelease];
         self.touchBarItem1.view = self.touchBarButton1;
         return self.touchBarItem1;
     } else if ([identifier isEqualToString:ButtonTabRoutePlanning]) {
-        QString title = "Route Planning";
+        QString title = "Route";
         self.touchBarItem2 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
         self.touchBarButton2 = [[NSButton buttonWithTitle:title.toNSString() target:self
                                                    action:@selector(buttonTabRoutePlanningClicked)] autorelease];
         self.touchBarItem2.view = self.touchBarButton2;
         return self.touchBarItem2;
     } else if ([identifier isEqualToString:ButtonTabFlow]) {
-        QString title = "Flow Analysis";
+        QString title = "Flow";
         self.touchBarItem3 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
         self.touchBarButton3 = [[NSButton buttonWithTitle:title.toNSString() target:self
                                                    action:@selector(buttonTabFlowClicked)] autorelease];
         self.touchBarItem3.view = self.touchBarButton3;
         return self.touchBarItem3;
+    } else if ([identifier isEqualToString:SliderFlow]) {
+        self.touchBarItem4 = [[[NSCustomTouchBarItem alloc] initWithIdentifier:identifier] autorelease];
+        self.touchBarSliderFlow = [[[NSSlider alloc] init] autorelease];
+        self.touchBarSliderFlow.minValue = 0;
+        self.touchBarSliderFlow.maxValue = 86400;
+        self.touchBarSliderFlow.target = self;
+        self.touchBarSliderFlow.action = @selector(sliderFlowChanged);
+        self.touchBarItem4.view = self.touchBarSliderFlow;
+        return self.touchBarItem4;
     }
     return nil;
 }
@@ -85,7 +98,7 @@ static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
 }
 
 - (void)buttonTabQueryClicked {
-        QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabQuery_clicked);
+    QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabQuery_clicked);
 }
 
 - (void)buttonTabRoutePlanningClicked {
@@ -96,7 +109,22 @@ static NSTouchBarItemIdentifier ButtonTabFlow = @"com.alexchi.ButtonTabFlow";
     QMetaObject::invokeMethod(mainWindow, &MainWindow::tb_buttonTabFlow_clicked);
 }
 
+- (void)sliderFlowChanged {
+    QMetaObject::invokeMethod(mainWindow, "tb_sliderFlow_changed",
+                              Qt::QueuedConnection, Q_ARG(int, self.touchBarSliderFlow.integerValue));
+}
+
+- (void)setSliderValue:(int)value {
+    self.touchBarSliderFlow.integerValue = value;
+}
 @end
+
+TouchBarProvider *touchBarProvider;
+
+void setTouchbarSliderFlowValue(int value) {
+    if (touchBarProvider)
+        [touchBarProvider setSliderValue:value];
+}
 
 QPointer<MainWindow> run_application(int argc, char *argv[]);
 
@@ -108,7 +136,7 @@ int main(int argc, char **argv) {
 
     {
         NSView *view = reinterpret_cast<NSView *>(window->winId());
-        TouchBarProvider *touchBarProvider = [[TouchBarProvider alloc] init];
+        touchBarProvider = [[TouchBarProvider alloc] init];
         [touchBarProvider installAsDelegateForWindow:view.window];
     }
 

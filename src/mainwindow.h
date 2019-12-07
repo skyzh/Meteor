@@ -9,6 +9,7 @@
 #include "TaskPlanRoute.h"
 #include "TaskGetMapping.h"
 #include "TaskFlowAnalysis.h"
+#include "MetroChartView.h"
 
 #include <QMainWindow>
 #include <QProgressBar>
@@ -48,7 +49,7 @@ private:
     void setup_chart(QList<QLineSeries *> series);
 
     QChart *chart;
-    QChartView *chartView;
+    MetroChartView *chartView;
     MetroWidget *metroWidgetRoute;
     MetroWidget *metroWidgetFlow;
     MetroPainter metroRoutePainter;
@@ -59,10 +60,12 @@ private:
 
     QVector<QVector<QVector<unsigned long long>>> flow_result;
     QVector<unsigned long long> flow_time;
+    QDateTime flow_date_time;
     int lst_flow_block;
 
     void load_station_mapping();
 
+    void set_slider_position(int position);
 private slots:
 
     void on_pushButtonRoutePlanning_clicked();
@@ -86,6 +89,8 @@ public slots:
     void tb_buttonTabRoutePlanning_clicked();
 
     void tb_buttonTabFlow_clicked();
+
+    void tb_sliderFlow_changed(int value);
 };
 
 #endif // MAINWINDOW_H

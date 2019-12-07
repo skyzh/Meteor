@@ -5,4 +5,6 @@
 #ifndef METRO_MAIN_H
 #define METRO_MAIN_H
 
+void setTouchbarSliderFlowValue(int value);
+
 #endif //METRO_MAIN_H

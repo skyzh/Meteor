@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "main.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -89,11 +90,16 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
 
     axisY->setRange(0, xx);
 
-    chartView = new QChartView(chart);
+    chartView = new MetroChartView(chart, this);
     chartView->setRenderHint(QPainter::Antialiasing);
     ui->layoutChart->addWidget(chartView);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setBackgroundRoundness(0);
+
+    connect(chartView, &MetroChartView::request_data, this, [=]() {
+        ui->fromTime->setDateTime(axisX->min());
+        ui->toTime->setDateTime(axisX->max());
+    });
 }
 
 void MainWindow::on_pushButtonRoutePlanning_clicked() {
@@ -125,7 +131,7 @@ void MainWindow::on_pushButtonQuery_clicked() {
                        start,
                        end,
                        ui->comboLine->currentData(),
-                       ui->comboStation->currentData()
+                       3 //ui->comboStation->currentData()
                });
 
     connect(task, &TaskQueryEntryExit::result, [=]() {
@@ -220,9 +226,10 @@ void MainWindow::load_station_mapping() {
 
 void MainWindow::on_pushButtonFlow_clicked() {
     TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
-    auto flow_begin = ui->flowDate->dateTime().toSecsSinceEpoch();
+    flow_date_time = ui->flowDate->dateTime();
+    auto flow_begin = flow_date_time.toSecsSinceEpoch();
     task->args({flow_begin, flow_begin + 86400, 60});
-    connect(task, &TaskFlowAnalysis::result, [=]() {
+    /* connect(task, &TaskFlowAnalysis::result, [=]() {
         auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();
 
@@ -230,8 +237,10 @@ void MainWindow::on_pushButtonFlow_clicked() {
             this->flow_result = flow_result;
             this->flow_time = flow_time;
             lst_flow_block = -1;
+            set_slider_position(ui->sliderTime->value());
         });
-    });
+
+    }); */
     scheduler.schedule(task);
 
 }
@@ -244,10 +253,28 @@ inline qreal map_to_line_color(qreal flow) {
 }
 
 void MainWindow::on_sliderTime_sliderMoved(int position) {
-    auto slide_time = ui->flowDate->dateTime().toSecsSinceEpoch() + position;
+    setTouchbarSliderFlowValue(position);
+    set_slider_position(position);
+}
+
+void MainWindow::tb_sliderFlow_changed(int value) {
+    ui->sliderTime->setValue(value);
+    set_slider_position(value);
+}
+
+void MainWindow::set_slider_position(int position) {
+    if (position >= 86400) position = 86400 - 1;
+    auto _slide_time = QTime(4, 0).addSecs(position);
+    ui->flowTime->setTime(_slide_time);
+
+    auto slide_time = flow_date_time.addSecs(4 * 60 * 60 + position).toSecsSinceEpoch();
+
     if (!station_mapping.empty()) {
         if (flow_time.empty()) return;
-        int current_flow_block = qLowerBound(flow_time, slide_time) - flow_time.begin();
+        auto iter = qLowerBound(flow_time, slide_time);
+        if (iter == flow_time.end()) return;
+        long current_flow_block = iter - flow_time.begin();
+        if (current_flow_block < 0) return;
         if (current_flow_block >= flow_time.size()) return;
         if (current_flow_block == lst_flow_block) return;
         lst_flow_block = current_flow_block;
@@ -265,6 +292,8 @@ void MainWindow::on_sliderTime_sliderMoved(int position) {
             };
             if (!stations.empty()) {
                 auto lst_station = stations.last();
+                auto &flow_in = flow_result[lst_station.id][station.id];
+                auto &flow_out = flow_result[station.id][lst_station.id];
                 auto flow_size_in = flow_result[lst_station.id][station.id][current_flow_block];
                 auto flow_size_out = flow_result[station.id][lst_station.id][current_flow_block];
 
