@@ -220,7 +220,8 @@ void MainWindow::load_station_mapping() {
 
 void MainWindow::on_pushButtonFlow_clicked() {
     TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
-    task->args({1546995600, 1546995600 + 86400, 60});
+    auto flow_begin = ui->flowDate->dateTime().toSecsSinceEpoch();
+    task->args({flow_begin, flow_begin + 86400, 60});
     connect(task, &TaskFlowAnalysis::result, [=]() {
         auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();
@@ -242,10 +243,11 @@ inline qreal map_to_line_color(qreal flow) {
     return (MAX_FLOW - flow) / MAX_FLOW / 3.0;
 }
 
-void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
+void MainWindow::on_sliderTime_sliderMoved(int position) {
+    auto slide_time = ui->flowDate->dateTime().toSecsSinceEpoch() + position;
     if (!station_mapping.empty()) {
         if (flow_time.empty()) return;
-        int current_flow_block = qLowerBound(flow_time, dateTime.toSecsSinceEpoch()) - flow_time.begin();
+        int current_flow_block = qLowerBound(flow_time, slide_time) - flow_time.begin();
         if (current_flow_block >= flow_time.size()) return;
         if (current_flow_block == lst_flow_block) return;
         lst_flow_block = current_flow_block;
@@ -257,7 +259,7 @@ void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
             auto station = MetroStation{
                     mapping.name,
                     mapping.stationID,
-                    (q++) * 150.0,
+                    (q++) * 80.0,
                     0,
                     "A"
             };
@@ -279,4 +281,5 @@ void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
         }
         metroWidgetFlow->setStations(stations, segments);
     }
+
 }

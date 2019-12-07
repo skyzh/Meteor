@@ -77,7 +77,7 @@ private slots:
 
     void on_pushButtonFlow_clicked();
 
-    void on_flowTime_dateTimeChanged(const QDateTime &dateTime);
+    void on_sliderTime_sliderMoved(int position);
 
 public slots:
 
