@@ -165,11 +165,19 @@ void TaskScheduler::schedule(Task *task) {
 }
 
 void TaskScheduler::emit_message(QString msg) {
-    emit message(QString("(%3%) %1%2")
-                         .arg(current_task_name)
-                         .arg(msg == "" ? "" : ": " + msg)
-                         .arg(int(double(task_cnt + 1) / task_cnt_total * 100))
-    );
+    int percent = int(double(task_cnt + 1) / task_cnt_total * 100);
+    if (percent != 100) {
+        emit message(QString("(%3%) %1%2")
+                             .arg(current_task_name)
+                             .arg(msg == "" ? "" : ": " + msg)
+                             .arg(percent)
+        );
+    } else {
+        emit message(QString("%1%2")
+                             .arg(current_task_name)
+                             .arg(msg == "" ? "" : ": " + msg)
+        );
+    }
 }
 
 void TaskScheduler::resolve(Task *task) {
