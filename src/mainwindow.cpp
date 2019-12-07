@@ -18,9 +18,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboStation->addItem("All", "All");
     {
         ui->comboLine->addItem("All", "All");
-        ui->comboLine->addItem("A - Line 4", "A"); // 67, 16
-        ui->comboLine->addItem("B - Line 1", "B"); // 0, 33 | 27
-        ui->comboLine->addItem("C - Line 2", "C"); // 66, 34
+        ui->comboLine->addItem("A - Line 4", "A");
+        ui->comboLine->addItem("B - Line 1", "B");
+        ui->comboLine->addItem("C - Line 2", "C");
+    }
+    {
+        ui->comboBoxFlow->addItem("A - Line 4 (Puyan - Pengbu)", "A");
+        ui->comboBoxFlow->addItem("B - Line 1 (Xianghu - Linping)", "B1");
+        ui->comboBoxFlow->addItem("B - Line 1 (Xianghu - Xiasha Jiangbin)", "B2");
+        ui->comboBoxFlow->addItem("C - Line 2 (Liangzhu - Chaoyang)", "C");
     }
 
     metroWidgetRoute = new MetroWidget(&metroRoutePainter, this);
@@ -237,7 +243,7 @@ void MainWindow::on_pushButtonFlow_clicked() {
             this->flow_result = flow_result;
             this->flow_time = flow_time;
             lst_flow_block = -1;
-            set_slider_position(ui->sliderTime->value());
+            update_flow_position(ui->sliderTime->value(), true);
         });
 
     });
@@ -254,41 +260,42 @@ inline qreal map_to_line_color(qreal flow) {
 
 void MainWindow::on_sliderTime_sliderMoved(int position) {
     setTouchbarSliderFlowValue(position);
-    set_slider_position(position);
+    update_flow_position(position);
 }
 
 void MainWindow::tb_sliderFlow_changed(int value) {
     ui->sliderTime->setValue(value);
-    set_slider_position(value);
+    update_flow_position(value);
 }
 
-void MainWindow::set_slider_position(int position) {
+void MainWindow::update_flow_position(int position, bool force_update) {
     if (position >= 86400) position = 86400 - 1;
     auto _slide_time = QTime(4, 0).addSecs(position);
     ui->flowTime->setTime(_slide_time);
 
     auto slide_time = flow_date_time.addSecs(4 * 60 * 60 + position).toSecsSinceEpoch();
 
+    const QString station_selected = ui->comboBoxFlow->currentData().toString();
+
     if (!station_mapping.empty()) {
         if (flow_time.empty()) return;
-        auto iter = qLowerBound(flow_time, slide_time);
+        auto iter = qLowerBound(flow_time.begin(), flow_time.end(), slide_time);
         if (iter == flow_time.end()) return;
         long current_flow_block = iter - flow_time.begin();
-        if (current_flow_block < 0) return;
         if (current_flow_block >= flow_time.size()) return;
-        if (current_flow_block == lst_flow_block) return;
+        if (!force_update && current_flow_block == lst_flow_block) return;
         lst_flow_block = current_flow_block;
         QVector<MetroStation> stations;
         QVector<MetroSegment> segments;
         int q = 0;
-        for (auto &_station : metros["A"]) {
+        for (auto &_station : metros[station_selected]) {
             auto &mapping = station_mapping[_station];
             auto station = MetroStation{
                     mapping.name,
                     mapping.stationID,
                     (q++) * 80.0,
                     0,
-                    "A"
+                    station_selected
             };
             if (!stations.empty()) {
                 auto lst_station = stations.last();
@@ -311,4 +318,8 @@ void MainWindow::set_slider_position(int position) {
         metroWidgetFlow->setStations(stations, segments);
     }
 
+}
+
+void MainWindow::on_comboBoxFlow_currentIndexChanged(int index) {
+    update_flow_position(ui->sliderTime->value(), true);
 }

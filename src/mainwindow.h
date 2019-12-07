@@ -66,7 +66,7 @@ private:
 
     void load_station_mapping();
 
-    void set_slider_position(int position);
+    void update_flow_position(int position, bool force_update = false);
 private slots:
 
     void on_pushButtonRoutePlanning_clicked();
@@ -82,6 +82,8 @@ private slots:
     void on_pushButtonFlow_clicked();
 
     void on_sliderTime_sliderMoved(int position);
+
+    void on_comboBoxFlow_currentIndexChanged(int index);
 
 public slots:
 

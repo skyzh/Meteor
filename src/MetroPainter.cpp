@@ -143,7 +143,7 @@ void MetroPainter::setStations(QVector<MetroStation> stations, QVector<MetroSegm
 }
 
 QColor MetroPainter::line_color_mapping(QString line) {
-    if (line == "B") return QColor(202, 45, 92);
+    if (line == "B" || line == "B1" || line == "B2") return QColor(202, 45, 92);
     if (line == "A") return QColor(130, 192, 90);
     if (line == "C") return QColor(240, 136, 62);
     return Qt::black;
