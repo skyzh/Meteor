@@ -127,7 +127,7 @@ void MainWindow::on_pushButtonQuery_clicked() {
                });
 
     connect(task, &TaskQueryEntryExit::result, [=]() {
-        QList<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
+        QVector<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
             QLineSeries *in_series = new QLineSeries;
@@ -215,6 +215,6 @@ void MainWindow::load_station_mapping() {
 
 void MainWindow::on_pushButtonFlow_clicked() {
     TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
-    task->args({1546995600, 1546995600 + 86400});
+    task->args({1546995600, 1546995600 + 86400, 60});
     scheduler.schedule(task);
 }

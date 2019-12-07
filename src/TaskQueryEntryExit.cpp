@@ -128,7 +128,7 @@ QList<Task *> TaskQueryEntryExit::dependencies() {
     return TaskReadDataset::from_time_range(start_time, end_time, this);
 }
 
-QList<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {
+QVector<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {
     QMutexLocker l(&_data_mutex);
     return data;
 }

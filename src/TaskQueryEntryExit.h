@@ -7,6 +7,7 @@
 
 #include "Task.h"
 #include <QObject>
+#include <QVector>
 
 class TaskQueryEntryExit : public Task {
 Q_OBJECT
@@ -30,7 +31,7 @@ public:
         unsigned long long count;
     };
 
-    QList<EntryExitResult> get_data();
+    QVector<EntryExitResult> get_data();
 
 private:
     long long start_time;
@@ -40,7 +41,7 @@ private:
     QString line_id;
 
     QMutex _data_mutex;
-    QList<EntryExitResult> data;
+    QVector<EntryExitResult> data;
 
 signals:
     void result();
