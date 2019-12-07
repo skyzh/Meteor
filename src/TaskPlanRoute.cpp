@@ -22,16 +22,17 @@ struct Route {
     qlonglong parent;
 };
 
-QList<qulonglong> TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
+QList<qulonglong>
+TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
     if (from < 0 || to < 0 || from >= N || to >= N) return QList<qulonglong>();
-    if (from == to) return QList<qulonglong>();
+    if (from == to) return {from};
 
     QList<qulonglong> route;
     QList<Route> q;
     QList<bool> visited;
     for (int i = 0; i < N; i++) visited << false;
     visited[from] = true;
-    q << Route { from, -1 };
+    q << Route{from, -1};
     qlonglong head = 0;
     while (head < q.length()) {
         auto last_step = q[head];
@@ -40,7 +41,7 @@ QList<qulonglong> TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat
             if (!visited[i]) {
                 if (adj_mat[last_step.id][i]) {
                     visited[i] = true;
-                    q << Route { i, head };
+                    q << Route{i, head};
                 }
             }
         }
@@ -96,7 +97,8 @@ QList<qulonglong> TaskPlanRoute::get_data() {
 }
 
 QVector<QVector<int>> TaskPlanRoute::get_route_mapping() {
-    const QString path = QString("%1/adjacency_adjacency/Metro_roadMap.csv").arg(ConfigManager::instance()->get("DATASET_PATH").toString());
+    const QString path = QString("%1/adjacency_adjacency/Metro_roadMap.csv").arg(
+            ConfigManager::instance()->get("DATASET_PATH").toString());
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return {};

@@ -33,9 +33,12 @@ public:
 
     QVector<Mapping> get_data();
 
+    QMap<QString, QList<qulonglong>> get_metros();
+
 
 private:
     QVector<Mapping> data;
+    QMap<QString, QList<qulonglong>> metros;
 
     QMutex _data_mutex;
 

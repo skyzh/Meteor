@@ -3,6 +3,7 @@
 //
 
 #include "TaskGetMapping.h"
+#include  "TaskPlanRoute.h"
 #include "ConfigManager.h"
 #include <QTextStream>
 #include <QFile>
@@ -39,11 +40,18 @@ void TaskGetMapping::run() {
                 emit success(false);
                 return;
             }
-            data << Mapping {
-                list[0].toULongLong(), list[1], list[2], list[3]
+            data << Mapping{
+                    list[0].toULongLong(), list[1], list[2], list[3]
             };
         }
+
+        auto map = TaskPlanRoute::get_route_mapping();
+        metros["A"] = TaskPlanRoute::plan_route(map, map.size(), 67, 16);
+        metros["B1"] = TaskPlanRoute::plan_route(map, map.size(), 0, 33);
+        metros["B2"] = TaskPlanRoute::plan_route(map, map.size(), 0, 27);
+        metros["C"] = TaskPlanRoute::plan_route(map, map.size(), 66, 34);
     }
+    
     emit result();
     emit success(true);
 }
@@ -67,5 +75,10 @@ TaskGetMapping::~TaskGetMapping() {
 
 TaskGetMapping::TaskGetMapping(QObject *parent) : Task(parent) {
 
+}
+
+QMap<QString, QList<qulonglong>> TaskGetMapping::get_metros() {
+    QMutexLocker l(&_data_mutex);
+    return metros;
 }
 
