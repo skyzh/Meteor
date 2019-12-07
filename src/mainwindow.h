@@ -55,6 +55,7 @@ private:
     MetroPainter metroFlowPainter;
 
     QVector<TaskGetMapping::Mapping> station_mapping;
+    QMap<QString, QList<qulonglong>> metros;
 
     QVector<QVector<QVector<unsigned long long>>> flow_result;
     QVector<unsigned long long> flow_time;

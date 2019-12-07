@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboStation->addItem("All", "All");
     {
         ui->comboLine->addItem("All", "All");
-        ui->comboLine->addItem("A - Line 4", "A");
-        ui->comboLine->addItem("B - Line 1", "B");
-        ui->comboLine->addItem("C - Line 2", "C");
+        ui->comboLine->addItem("A - Line 4", "A"); // 67, 16
+        ui->comboLine->addItem("B - Line 1", "B"); // 0, 33 | 27
+        ui->comboLine->addItem("C - Line 2", "C"); // 66, 34
     }
 
     metroWidgetRoute = new MetroWidget(&metroRoutePainter, this);
@@ -174,13 +174,13 @@ void MainWindow::on_actionFlow_triggered() {
 void MainWindow::load_station_mapping() {
     TaskGetMapping *task = new TaskGetMapping(this);
     connect(task, &TaskGetMapping::result, [=]() {
-        QVector<TaskGetMapping::Mapping> data = task->get_data();
-
+        auto data = task->get_data();
+        auto metros = task->get_metros();
         QMetaObject::invokeMethod(this, [=]() {
             this->station_mapping = data;
+            this->metros = metros;
             QVector<MetroStation> stations;
             QVector<MetroSegment> segments;
-            int q = 0;
             for (auto &&mapping: data) {
                 QString station = QString("(%3)%1 - %2")
                         .arg(mapping.stationID)
@@ -189,25 +189,27 @@ void MainWindow::load_station_mapping() {
                 ui->comboStation->addItem(station, mapping.stationID);
                 ui->comboRouteFrom->addItem(station, mapping.stationID);
                 ui->comboRouteTo->addItem(station, mapping.stationID);
-                if (mapping.lineID == "A") {
-                    auto station = MetroStation{
-                            mapping.name,
-                            mapping.stationID,
-                            (q++) * 150.0,
-                            0,
-                            mapping.lineID
+            }
+            int q = 0;
+            for (auto &_station : metros["A"]) {
+                auto &mapping = station_mapping[_station];
+                auto station = MetroStation{
+                        mapping.name,
+                        mapping.stationID,
+                        (q++) * 150.0,
+                        0,
+                        "A"
+                };
+                if (!stations.empty()) {
+                    auto lst_station = stations.last();
+                    segments << MetroSegment{
+                            lst_station.x, lst_station.y,
+                            station.x, station.y,
+                            MetroPainter::line_color_mapping(station.lineID),
+                            MetroPainter::line_color_mapping(station.lineID)
                     };
-                    if (!stations.empty()) {
-                        auto lst_station = stations.last();
-                        segments << MetroSegment{
-                                lst_station.x, lst_station.y,
-                                station.x, station.y,
-                                MetroPainter::line_color_mapping(station.lineID),
-                                {}
-                        };
-                    }
-                    stations << station;
                 }
+                stations << station;
             }
             metroWidgetRoute->setStations(stations, segments);
         });
@@ -220,7 +222,7 @@ void MainWindow::on_pushButtonFlow_clicked() {
     TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
     task->args({1546995600, 1546995600 + 86400, 60});
     connect(task, &TaskFlowAnalysis::result, [=]() {
-        auto flow_result = task->get_flow_result();
+        auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();
 
         QMetaObject::invokeMethod(this, [=]() {
@@ -233,6 +235,13 @@ void MainWindow::on_pushButtonFlow_clicked() {
 
 }
 
+inline qreal map_to_line_color(qreal flow) {
+    const qreal MAX_FLOW = 30000;
+    if (flow >= MAX_FLOW) return 0;
+    if (flow <= 0) return 1.0 / 3;
+    return (MAX_FLOW - flow) / MAX_FLOW / 3.0;
+}
+
 void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
     if (!station_mapping.empty()) {
         if (flow_time.empty()) return;
@@ -243,26 +252,30 @@ void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
         QVector<MetroStation> stations;
         QVector<MetroSegment> segments;
         int q = 0;
-        for (auto &mapping : station_mapping) {
-            if (mapping.lineID == "A") {
-                auto station = MetroStation{
-                        mapping.name,
-                        mapping.stationID,
-                        (q++) * 150.0,
-                        0,
-                        mapping.lineID
+        for (auto &_station : metros["A"]) {
+            auto &mapping = station_mapping[_station];
+            auto station = MetroStation{
+                    mapping.name,
+                    mapping.stationID,
+                    (q++) * 150.0,
+                    0,
+                    "A"
+            };
+            if (!stations.empty()) {
+                auto lst_station = stations.last();
+                auto flow_size_in = flow_result[lst_station.id][station.id][current_flow_block];
+                auto flow_size_out = flow_result[station.id][lst_station.id][current_flow_block];
+
+                segments << MetroSegment{
+                        lst_station.x, lst_station.y,
+                        station.x, station.y,
+                        QColor::fromHslF(map_to_line_color(flow_size_in), 0.7, 0.5),
+                        QColor::fromHslF(map_to_line_color(flow_size_out), 0.7, 0.5),
+                        QString::number(flow_size_in),
+                        QString::number(flow_size_out)
                 };
-                if (!stations.empty()) {
-                    auto lst_station = stations.last();
-                    segments << MetroSegment{
-                            lst_station.x, lst_station.y,
-                            station.x, station.y,
-                            Qt::black,
-                            QString("%1").arg(flow_result[lst_station.id][station.id][current_flow_block])
-                    };
-                }
-                stations << station;
             }
+            stations << station;
         }
         metroWidgetFlow->setStations(stations, segments);
     }

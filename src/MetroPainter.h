@@ -19,8 +19,8 @@ struct MetroStation {
 
 struct MetroSegment {
     qreal x1, y1, x2, y2;
-    QColor color;
-    QString msg;
+    QColor upper_color, lower_color;
+    QString upper_msg, lower_msg;
 };
 
 class MetroPainter {
@@ -34,7 +34,7 @@ private:
     QVector<MetroStation> stations;
     QVector<MetroSegment> segments;
 
-    const int DEFAULT_SEGMENT_WIDTH = 8.0;
+    const int DEFAULT_SEGMENT_WIDTH = 8;
 
     QRectF CAMERA_BOUND;
 

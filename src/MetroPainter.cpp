@@ -23,13 +23,25 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     painter->setBrush(Qt::BrushStyle::NoBrush);
 
     for (auto &&segment : segments) {
-        segmentPen.setColor(segment.color);
-        painter->setPen(segmentPen);
-        painter->drawLine(
-                segment.x1 + CAMERA_OFFSET_X,
-                segment.y1 + CAMERA_OFFSET_Y,
-                segment.x2 + CAMERA_OFFSET_X,
-                segment.y2 + CAMERA_OFFSET_Y);
+        {
+            segmentPen.setColor(segment.upper_color);
+            painter->setPen(segmentPen);
+            painter->drawLine(
+                    segment.x1 + CAMERA_OFFSET_X,
+                    segment.y1 + CAMERA_OFFSET_Y - DEFAULT_SEGMENT_WIDTH / 4,
+                    segment.x2 + CAMERA_OFFSET_X,
+                    segment.y2 + CAMERA_OFFSET_Y - DEFAULT_SEGMENT_WIDTH / 4);
+        }
+        {
+            segmentPen.setColor(segment.lower_color);
+            painter->setPen(segmentPen);
+            painter->drawLine(
+                    segment.x1 + CAMERA_OFFSET_X,
+                    segment.y1 + CAMERA_OFFSET_Y +  DEFAULT_SEGMENT_WIDTH / 4,
+                    segment.x2 + CAMERA_OFFSET_X,
+                    segment.y2 + CAMERA_OFFSET_Y + DEFAULT_SEGMENT_WIDTH / 4);
+        }
+
     }
 
     // [3] Draw Station Circles
@@ -71,13 +83,24 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     painter->setPen(textPen);
     painter->setFont(textFont);
     for (auto &&segment : segments) {
-        QRectF pos(
-                segment.x1 + CAMERA_OFFSET_X,
-                segment.y1 - SEGMENT_NAME_MARGIN - 30 + CAMERA_OFFSET_Y,
-                segment.x2 - segment.x1,  30);
-        painter->drawText(pos,
-                          Qt::AlignBottom | Qt::AlignHCenter,
-                          segment.msg);
+        {
+            QRectF pos(
+                    segment.x1 + CAMERA_OFFSET_X,
+                    segment.y1 - SEGMENT_NAME_MARGIN - 30 + CAMERA_OFFSET_Y,
+                    segment.x2 - segment.x1, 30);
+            painter->drawText(pos,
+                              Qt::AlignBottom | Qt::AlignHCenter,
+                              segment.upper_msg);
+        }
+        {
+            QRectF pos(
+                    segment.x1 + CAMERA_OFFSET_X,
+                    segment.y1 + SEGMENT_NAME_MARGIN + CAMERA_OFFSET_Y,
+                    segment.x2 - segment.x1, 30);
+            painter->drawText(pos,
+                              Qt::AlignTop | Qt::AlignHCenter,
+                              segment.lower_msg);
+        }
     }
 
     painter->restore();
@@ -88,7 +111,7 @@ MetroPainter::MetroPainter() {
     stationBrush = QBrush(Qt::red);
     stationBrushInner = QBrush(Qt::white);
     segmentPen = QPen(Qt::white);
-    segmentPen.setWidth(DEFAULT_SEGMENT_WIDTH);
+    segmentPen.setWidth(DEFAULT_SEGMENT_WIDTH / 2);
     textPen = QPen(Qt::black);
     textFont.setPixelSize(12);
     CAMERA_X = CAMERA_Y = 0;
