@@ -225,11 +225,11 @@ void MainWindow::load_station_mapping() {
 }
 
 void MainWindow::on_pushButtonFlow_clicked() {
-    TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
+    auto task = new TaskQueryFlow(this);
     flow_date_time = ui->flowDate->dateTime();
     auto flow_begin = flow_date_time.toSecsSinceEpoch();
     task->args({flow_begin, flow_begin + 86400, 60});
-    /* connect(task, &TaskFlowAnalysis::result, [=]() {
+    connect(task, &TaskQueryFlow::result, [=]() {
         auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();
 
@@ -240,7 +240,7 @@ void MainWindow::on_pushButtonFlow_clicked() {
             set_slider_position(ui->sliderTime->value());
         });
 
-    }); */
+    });
     scheduler.schedule(task);
 
 }

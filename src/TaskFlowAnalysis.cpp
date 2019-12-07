@@ -173,6 +173,7 @@ bool TaskFlowAnalysis::parse_args() {
 void TaskFlowAnalysis::init_flow_data() {
     auto mat = TaskPlanRoute::get_route_mapping();
     N = mat.size();
+
     route_cache.clear();
     for (int i = 0; i < N; i++) {
         route_cache.push_back({});
@@ -181,20 +182,8 @@ void TaskFlowAnalysis::init_flow_data() {
         }
     }
 
-    flow.clear();
-    flow_time.clear();
-    for (qulonglong time = start_time; time <= end_time; time += time_div) {
-        flow_time << time;
-    }
-    for (int i = 0; i < N; i++) {
-        flow.push_back({});
-        for (int j = 0; j < N; j++) {
-            flow[i].push_back({});
-            for (qulonglong time = start_time; time <= end_time; time += time_div) {
-                flow[i][j] << 0;
-            }
-        }
-    }
+    init_flow_time(flow_time, start_time, end_time, time_div);
+    init_flow_matrix(flow, N, start_time, end_time, time_div);
 }
 
 void TaskFlowAnalysis::process_flow_data(const FlowResult &flow_) {
@@ -215,40 +204,30 @@ void TaskFlowAnalysis::process_flow_data(const FlowResult &flow_) {
     }
 }
 
-/*
-QVector<unsigned long long> TaskFlowAnalysis::get_flow_time() {
-    QMutexLocker l(&_data_mutex);
-    return flow_time;
+bool TaskFlowAnalysis::journal() {
+    return true;
 }
 
-QVector<QVector<QVector<unsigned long long>>> TaskFlowAnalysis::get_flow_result() {
-    QMutexLocker l(&_data_mutex);
-    return flow;
-}
-
-QVector<QVector<QVector<unsigned long long>>> TaskFlowAnalysis::get_flow_per_hour_result() {
-    QMutexLocker l(&_data_mutex);
-    return flow_per_hour;
-}
-
-void TaskFlowAnalysis::postprocess_flow_data() {
-    const int window_size = 3600 / time_div;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            qulonglong sum = 0;
-            int _size = flow[i][j].size();
-            for (int tb = 0; tb < _size; tb++) {
-                int sub = tb - window_size;
-                sum += flow[i][j][tb];
-                if (sub >= 0) sum -= flow[i][j][sub];
-                flow_per_hour[i][j][tb] = sum;
-            }
-        }
+void TaskFlowAnalysis::init_flow_time(QVector<unsigned long long> &flow_time, unsigned long long start_time,
+                                      unsigned long long end_time, unsigned long long time_div) {
+    flow_time.clear();
+    for (qulonglong time = start_time; time <= end_time; time += time_div) {
+        flow_time << time;
     }
 }
 
- */
+void TaskFlowAnalysis::init_flow_matrix(QVector<QVector<QVector<unsigned long long>>> &flow, unsigned N,
+                                        unsigned long long start_time,
+                                        unsigned long long end_time, unsigned long long time_div) {
+    flow.clear();
 
-bool TaskFlowAnalysis::journal() {
-    return true;
+    for (int i = 0; i < N; i++) {
+        flow.push_back({});
+        for (int j = 0; j < N; j++) {
+            flow[i].push_back({});
+            for (qulonglong time = start_time; time <= end_time; time += time_div) {
+                flow[i][j] << 0;
+            }
+        }
+    }
 }

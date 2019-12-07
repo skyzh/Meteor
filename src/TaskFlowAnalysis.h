@@ -33,6 +33,14 @@ public:
 
     ~TaskFlowAnalysis() override;
 
+
+    static void init_flow_time(QVector<unsigned long long> &flow_time, unsigned long long start_time,
+                               unsigned long long end_time, unsigned long long time_div);
+
+    static void init_flow_matrix(QVector<QVector<QVector<unsigned long long>>> &flow, unsigned N,
+                                 unsigned long long start_time,
+                                 unsigned long long end_time, unsigned long long time_div);
+
 private:
     unsigned long long start_time;
     unsigned long long end_time;
@@ -46,8 +54,6 @@ private:
     void init_flow_data();
 
     void process_flow_data(const FlowResult &flow_);
-
-    // void postprocess_flow_data();
 
     unsigned N;
 
