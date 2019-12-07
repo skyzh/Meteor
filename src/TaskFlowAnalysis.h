@@ -31,7 +31,8 @@ public:
         QString userID;
     };
 
-    QVector<FlowResult> get_data();
+    QVector<QVector<QVector<unsigned long long>>> get_flow_result();
+    QVector<unsigned long long> get_flow_time();
 
 private:
     unsigned long long start_time;

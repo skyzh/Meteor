@@ -8,6 +8,7 @@
 #include <QDateTimeAxis>
 #include <QSizePolicy>
 #include <QGraphicsLayout>
+#include <QtAlgorithms>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), scheduler(this) {
@@ -21,8 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboLine->addItem("C - Line 2", "C");
     }
 
-    metroWidget = new MetroWidget(&metroPainter, this);
-    ui->layoutRoute->addWidget(metroWidget);
+    metroWidgetRoute = new MetroWidget(&metroRoutePainter, this);
+    metroWidgetFlow = new MetroWidget(&metroFlowPainter, this);
+    ui->layoutRoute->addWidget(metroWidgetRoute);
+    ui->layoutFlow->addWidget(metroWidgetFlow);
+    lst_flow_block = -1;
 
     connect(&scheduler, &TaskScheduler::progress, this, &MainWindow::progress);
     connect(&scheduler, &TaskScheduler::message, this, &MainWindow::message);
@@ -36,8 +40,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     scheduler.quit();
     scheduler.wait();
-    ui->layoutRoute->removeWidget(metroWidget);
-    delete metroWidget;
     delete ui;
 }
 
@@ -200,13 +202,14 @@ void MainWindow::load_station_mapping() {
                         segments << MetroSegment{
                                 lst_station.x, lst_station.y,
                                 station.x, station.y,
-                                mapping.lineID
+                                MetroPainter::line_color_mapping(station.lineID),
+                                {}
                         };
                     }
                     stations << station;
                 }
             }
-            metroWidget->setStations(stations, segments);
+            metroWidgetRoute->setStations(stations, segments);
         });
     });
     scheduler.schedule(task);
@@ -216,5 +219,51 @@ void MainWindow::load_station_mapping() {
 void MainWindow::on_pushButtonFlow_clicked() {
     TaskFlowAnalysis *task = new TaskFlowAnalysis(this);
     task->args({1546995600, 1546995600 + 86400, 60});
+    connect(task, &TaskFlowAnalysis::result, [=]() {
+        auto flow_result = task->get_flow_result();
+        auto flow_time = task->get_flow_time();
+
+        QMetaObject::invokeMethod(this, [=]() {
+            this->flow_result = flow_result;
+            this->flow_time = flow_time;
+            lst_flow_block = -1;
+        });
+    });
     scheduler.schedule(task);
+
+}
+
+void MainWindow::on_flowTime_dateTimeChanged(const QDateTime &dateTime) {
+    if (!station_mapping.empty()) {
+        if (flow_time.empty()) return;
+        int current_flow_block = qLowerBound(flow_time, dateTime.toSecsSinceEpoch()) - flow_time.begin();
+        if (current_flow_block >= flow_time.size()) return;
+        if (current_flow_block == lst_flow_block) return;
+        lst_flow_block = current_flow_block;
+        QVector<MetroStation> stations;
+        QVector<MetroSegment> segments;
+        int q = 0;
+        for (auto &mapping : station_mapping) {
+            if (mapping.lineID == "A") {
+                auto station = MetroStation{
+                        mapping.name,
+                        mapping.stationID,
+                        (q++) * 150.0,
+                        0,
+                        mapping.lineID
+                };
+                if (!stations.empty()) {
+                    auto lst_station = stations.last();
+                    segments << MetroSegment{
+                            lst_station.x, lst_station.y,
+                            station.x, station.y,
+                            Qt::black,
+                            QString("%1").arg(flow_result[lst_station.id][station.id][current_flow_block])
+                    };
+                }
+                stations << station;
+            }
+        }
+        metroWidgetFlow->setStations(stations, segments);
+    }
 }

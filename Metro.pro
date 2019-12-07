@@ -18,27 +18,45 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    db.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    task.cpp \
-    task_delay.cpp \
-    task_factory.cpp \
-    task_query.cpp \
-    task_read_dataset.cpp \
-    task_scheduler.cpp
+    src/ConfigManager.cpp \
+    src/MetroPainter.cpp \
+    src/MetroWidget.cpp \
+    src/Task.cpp \
+    src/TaskAddTimestamp.cpp \
+    src/TaskDelay.cpp \
+    src/TaskFlowAnalysis.cpp \
+    src/TaskGetMapping.cpp \
+    src/TaskInitDatabase.cpp \
+    src/TaskPlanRoute.cpp \
+    src/TaskQueryEntryExit.cpp \
+    src/TaskReadDataset.cpp \
+    src/TaskScheduler.cpp \
+    src/db.cpp \
+    src/main.cpp \
+    src/main.mm \
+    src/mainwindow.cpp \
+    src/utils.cpp
 
 HEADERS += \
-    db.h \
-    mainwindow.h \
-    task.h \
-    task_delay.h \
-    task_query.h \
-    task_read_dataset.h \
-    task_scheduler.h
+    src/ConfigManager.h \
+    src/MetroPainter.h \
+    src/MetroWidget.h \
+    src/Task.h \
+    src/TaskAddTimestamp.h \
+    src/TaskDelay.h \
+    src/TaskFlowAnalysis.h \
+    src/TaskGetMapping.h \
+    src/TaskInitDatabase.h \
+    src/TaskPlanRoute.h \
+    src/TaskQueryEntryExit.h \
+    src/TaskReadDataset.h \
+    src/TaskScheduler.h \
+    src/db.h \
+    src/mainwindow.h \
+    src/utils.h
 
 FORMS += \
-    mainwindow.ui
+    src/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

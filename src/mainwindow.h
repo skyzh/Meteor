@@ -49,10 +49,16 @@ private:
 
     QChart *chart;
     QChartView *chartView;
-    MetroWidget *metroWidget;
-    MetroPainter metroPainter;
+    MetroWidget *metroWidgetRoute;
+    MetroWidget *metroWidgetFlow;
+    MetroPainter metroRoutePainter;
+    MetroPainter metroFlowPainter;
 
     QVector<TaskGetMapping::Mapping> station_mapping;
+
+    QVector<QVector<QVector<unsigned long long>>> flow_result;
+    QVector<unsigned long long> flow_time;
+    int lst_flow_block;
 
     void load_station_mapping();
 
@@ -69,6 +75,8 @@ private slots:
     void on_actionFlow_triggered();
 
     void on_pushButtonFlow_clicked();
+
+    void on_flowTime_dateTimeChanged(const QDateTime &dateTime);
 
 public slots:
 

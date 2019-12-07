@@ -98,17 +98,6 @@ void TaskFlowAnalysis::run() {
         emit success(true);
     }
 
-    for (int k = 0; k < flow_time.size(); k++) {
-        qDebug() << k;
-        for (int i = 0; i < N; i++) {
-            QStringList flow__;
-            for (int j = 0; j < N; j++) {
-                flow__ << QString("%1").arg(flow[i][j][k]);
-            }
-            qDebug() << flow__;
-        }
-    }
-
     db.close();
 }
 
@@ -126,10 +115,6 @@ QString TaskFlowAnalysis::display_name() {
 
 TaskFlowAnalysis::~TaskFlowAnalysis() {
 
-}
-
-QVector<TaskFlowAnalysis::FlowResult> TaskFlowAnalysis::get_data() {
-    return QVector<TaskFlowAnalysis::FlowResult>();
 }
 
 bool TaskFlowAnalysis::parse_args() {
@@ -192,4 +177,14 @@ void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flo
         }
         lst_time_block = current_time_block + 1;
     }
+}
+
+QVector<unsigned long long> TaskFlowAnalysis::get_flow_time() {
+    QMutexLocker l(&_data_mutex);
+    return flow_time;
+}
+
+QVector<QVector<QVector<unsigned long long>>> TaskFlowAnalysis::get_flow_result() {
+    QMutexLocker l(&_data_mutex);
+    return flow;
 }

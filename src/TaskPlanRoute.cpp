@@ -56,10 +56,14 @@ QList<qulonglong> TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat
 }
 
 void TaskPlanRoute::run() {
-
     {
         QMutexLocker l(&_data_mutex);
         QVector<QVector<int>> mat = get_route_mapping();
+        if (mat.empty()) {
+            emit message("Error while reading road map");
+            emit success(false);
+            return;
+        }
         data = plan_route(mat, mat.length(), from, to);
     }
 
