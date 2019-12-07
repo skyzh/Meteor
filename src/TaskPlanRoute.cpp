@@ -22,7 +22,7 @@ struct Route {
     qlonglong parent;
 };
 
-QList<qulonglong> TaskPlanRoute::plan_route(const QList<QList<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
+QList<qulonglong> TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
     if (from < 0 || to < 0 || from >= N || to >= N) return QList<qulonglong>();
     if (from == to) return QList<qulonglong>();
 
@@ -65,7 +65,7 @@ void TaskPlanRoute::run() {
     }
     QTextStream in(&file);
 
-    QList<QList<int>> mat;
+    QVector<QVector<int>> mat;
     int N;
     bool first_line = true;
 
@@ -77,7 +77,7 @@ void TaskPlanRoute::run() {
             continue;
         }
         list.removeFirst();
-        mat << QList<int>();
+        mat << QVector<int>();
         for (auto &&i : list) {
             if (i == "1") mat.last() << 1;
             else mat.last() << 0;
