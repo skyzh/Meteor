@@ -59,15 +59,15 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     painter->setPen(textPen);
     painter->setFont(textFont);
     for (auto &&station : stations) {
-        QRect pos = QRect(station.x + CAMERA_OFFSET_X - 100,
-                          station.y + STATION_CIRCLE_RADIUS + STATION_NAME_MARGIN + CAMERA_OFFSET_Y,
-                          200,
-                          80);
-        painter->drawText(pos,
-                          Qt::AlignHCenter | Qt::AlignTop,
+        QMatrix matrix;
+        matrix.translate(station.x + CAMERA_OFFSET_X,
+                         station.y + STATION_CIRCLE_RADIUS + STATION_NAME_MARGIN + CAMERA_OFFSET_Y);
+        matrix.rotate(45);
+        painter->setMatrix(matrix);
+        painter->drawText(QPointF(0, 0),
                           QString("(%1) %2").arg(station.id).arg(station.name));
     }
-
+    painter->resetMatrix();
     painter->restore();
 }
 
