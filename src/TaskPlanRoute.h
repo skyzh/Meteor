@@ -36,6 +36,8 @@ public:
 
     static QList<qulonglong> plan_route(const QVector<QVector<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to);
 
+    static QVector<QVector<int>> get_route_mapping();
+
 signals:
     void result();
 

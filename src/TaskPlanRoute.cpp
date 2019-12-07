@@ -56,36 +56,11 @@ QList<qulonglong> TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat
 }
 
 void TaskPlanRoute::run() {
-    const QString path = QString("%1/adjacency_adjacency/Metro_roadMap.csv").arg(ConfigManager::instance()->get("DATASET_PATH").toString());
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly)) {
-        emit message(QString("Failed to open file %1").arg(path));
-        emit success(false);
-        return;
-    }
-    QTextStream in(&file);
 
-    QVector<QVector<int>> mat;
-    int N;
-    bool first_line = true;
-
-    while (!in.atEnd()) {
-        QStringList list = in.readLine().split(",");
-        if (first_line) {
-            N = list.length() - 1;
-            first_line = false;
-            continue;
-        }
-        list.removeFirst();
-        mat << QVector<int>();
-        for (auto &&i : list) {
-            if (i == "1") mat.last() << 1;
-            else mat.last() << 0;
-        }
-    }
     {
         QMutexLocker l(&_data_mutex);
-        data = plan_route(mat, N, from, to);
+        QVector<QVector<int>> mat = get_route_mapping();
+        data = plan_route(mat, mat.length(), from, to);
     }
 
     emit result();
@@ -114,4 +89,31 @@ bool TaskPlanRoute::parse_args() {
 QList<qulonglong> TaskPlanRoute::get_data() {
     QMutexLocker l(&_data_mutex);
     return data;
+}
+
+QVector<QVector<int>> TaskPlanRoute::get_route_mapping() {
+    const QString path = QString("%1/adjacency_adjacency/Metro_roadMap.csv").arg(ConfigManager::instance()->get("DATASET_PATH").toString());
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    QTextStream in(&file);
+
+    QVector<QVector<int>> mat;
+    bool first_line = true;
+
+    while (!in.atEnd()) {
+        QStringList list = in.readLine().split(",");
+        if (first_line) {
+            first_line = false;
+            continue;
+        }
+        list.removeFirst();
+        mat.push_back({});
+        for (auto &&i : list) {
+            if (i == "1") mat.last() << 1;
+            else mat.last() << 0;
+        }
+    }
+    return mat;
 }
