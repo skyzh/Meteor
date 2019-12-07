@@ -9,6 +9,7 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     const qreal STATION_CIRCLE_RADIUS = 10;
     const qreal STATION_CIRCLE_INNER_RADIUS = 6;
     const qreal STATION_NAME_MARGIN = 5;
+    const qreal SEGMENT_NAME_MARGIN = 10;
 
     painter->save();
 
@@ -19,12 +20,10 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     painter->fillRect(region, background);
 
     // [2] Draw Station Segments
-
-    // Outer Circle
     painter->setBrush(Qt::BrushStyle::NoBrush);
 
     for (auto &&segment : segments) {
-        segmentPen.setColor(line_color_mapping(segment.lineID));
+        segmentPen.setColor(segment.color);
         painter->setPen(segmentPen);
         painter->drawLine(
                 segment.x1 + CAMERA_OFFSET_X,
@@ -55,7 +54,6 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     }
 
     // [4] Draw Station Name
-
     painter->setPen(textPen);
     painter->setFont(textFont);
     for (auto &&station : stations) {
@@ -68,6 +66,20 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
                           QString("(%1) %2").arg(station.id).arg(station.name));
     }
     painter->resetMatrix();
+
+    // [5] Draw Segment Info
+    painter->setPen(textPen);
+    painter->setFont(textFont);
+    for (auto &&segment : segments) {
+        QRectF pos(
+                segment.x1 + CAMERA_OFFSET_X,
+                segment.y1 - SEGMENT_NAME_MARGIN - 30 + CAMERA_OFFSET_Y,
+                segment.x2 - segment.x1,  30);
+        painter->drawText(pos,
+                          Qt::AlignBottom | Qt::AlignHCenter,
+                          segment.msg);
+    }
+
     painter->restore();
 }
 
@@ -111,7 +123,7 @@ QColor MetroPainter::line_color_mapping(QString line) {
     if (line == "B") return QColor(202, 45, 92);
     if (line == "A") return QColor(130, 192, 90);
     if (line == "C") return QColor(240, 136, 62);
-    return QColor(0, 0, 0);
+    return Qt::black;
 }
 
 void MetroPainter::calc_camera_bound() {

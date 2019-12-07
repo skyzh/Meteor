@@ -19,7 +19,8 @@ struct MetroStation {
 
 struct MetroSegment {
     qreal x1, y1, x2, y2;
-    QString lineID;
+    QColor color;
+    QString msg;
 };
 
 class MetroPainter {
