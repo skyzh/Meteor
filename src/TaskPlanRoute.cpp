@@ -23,7 +23,9 @@ struct Route {
 };
 
 QList<qulonglong>
-TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat, qulonglong N, qulonglong from, qlonglong to) {
+TaskPlanRoute::plan_route(const QVector<QVector<int>> &adj_mat,
+                          qulonglong N, qulonglong from, qlonglong to,
+                          bool stay_on_line) {
     if (from < 0 || to < 0 || from >= N || to >= N) return QList<qulonglong>();
     if (from == to) return {from};
 

@@ -46,10 +46,12 @@ void TaskGetMapping::run() {
         }
 
         auto map = TaskPlanRoute::get_route_mapping();
-        metros["A"] = TaskPlanRoute::plan_route(map, map.size(), 67, 16);
-        metros["B1"] = TaskPlanRoute::plan_route(map, map.size(), 0, 33);
-        metros["B2"] = TaskPlanRoute::plan_route(map, map.size(), 0, 27);
-        metros["C"] = TaskPlanRoute::plan_route(map, map.size(), 66, 34);
+        metros["A"] = TaskPlanRoute::plan_route(map, map.size(), 67, 16, true);
+        metros["C"] = TaskPlanRoute::plan_route(map, map.size(), 66, 34, true);
+        map[79][80] = 0;
+        map[80][79] = 0;
+        metros["B1"] = TaskPlanRoute::plan_route(map, map.size(), 0, 33, true);
+        metros["B2"] = TaskPlanRoute::plan_route(map, map.size(), 0, 27, true);
     }
     
     emit result();

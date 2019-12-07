@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     metroWidgetRoute = new MetroWidget(&metroRoutePainter, this);
     metroWidgetFlow = new MetroWidget(&metroFlowPainter, this);
-    ui->layoutRoute->addWidget(metroWidgetRoute);
+    ui->layoutRoute->addWidget(metroWidgetRoute, 0, 1);
     ui->layoutFlow->addWidget(metroWidgetFlow);
     lst_flow_block = -1;
 
@@ -114,12 +114,80 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
     scheduler.schedule(task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
+        if (station_mapping.empty()) return;
+
         QList<qulonglong> route = task->get_data();
 
+        if (route.size() == 0) return;
+
         QMetaObject::invokeMethod(this, [=]() {
-            QString str;
-            for (auto i : route) str += QString("%1 ->").arg(i);
-            // ui->textRoute->setPlainText(str);
+            ui->tableRoute->clear();
+            QList<QTableWidgetItem *> action_list;
+            QString current_line;
+            {
+                auto route_ = route[0];
+                auto board_item = new QTableWidgetItem(
+                        QString("Board at %1 Station")
+                                .arg(station_mapping[route_].name));
+                board_item->setData(TABLE_STATION, route_);
+                for (auto &&lineID : metros.keys()) {
+                    auto &stations = metros[lineID];
+                    if (stations.count(route_)) {
+                        current_line = lineID;
+                        break;
+                    }
+                }
+                board_item->setData(TABLE_LINE, current_line);
+                action_list << board_item;
+            }
+
+            auto lst_route = route[0];
+
+            for (int i = 1; i < route.size(); i++) {
+                auto route_ = route[i];
+
+                auto &stations = metros[current_line];
+                if (!stations.count(route_)) {
+                    for (auto &&lineID : metros.keys()) {
+                        auto &stations = metros[lineID];
+                        if (stations.count(route_)) {
+                            auto transfer_item = new QTableWidgetItem(
+                                    QString("Transfer from %1 to %2 at %3 Station")
+                                            .arg(current_line)
+                                            .arg(lineID)
+                                            .arg(station_mapping[lst_route].name));
+                            transfer_item->setData(TABLE_STATION, lst_route);
+                            transfer_item->setData(TABLE_LINE, lineID);
+                            action_list << transfer_item;
+                            current_line = lineID;
+                            break;
+                        }
+                    }
+                }
+
+                auto station_item = new QTableWidgetItem(
+                        QString("  %1 Station")
+                                .arg(station_mapping[route_].name));
+                station_item->setData(TABLE_STATION, route_);
+                station_item->setData(TABLE_LINE, current_line);
+                action_list << station_item;
+
+                lst_route = route_;
+            }
+            {
+                auto route_ = route.last();
+                auto exit_item = new QTableWidgetItem(
+                        QString("Exit at %1 Station")
+                                .arg(station_mapping[route_].name));
+                exit_item->setData(TABLE_STATION, route_);
+                exit_item->setData(TABLE_LINE, current_line);
+                action_list << exit_item;
+            }
+            ui->tableRoute->setRowCount(action_list.length());
+            ui->tableRoute->setColumnCount(1);
+            for (int i = 0; i < action_list.length(); i++) {
+                ui->tableRoute->setItem(i, 0, action_list[i]);
+            }
         });
     });
 }
@@ -137,7 +205,7 @@ void MainWindow::on_pushButtonQuery_clicked() {
                        start,
                        end,
                        ui->comboLine->currentData(),
-                       3 //ui->comboStation->currentData()
+                       ui->comboStation->currentData()
                });
 
     connect(task, &TaskQueryEntryExit::result, [=]() {
@@ -191,9 +259,7 @@ void MainWindow::load_station_mapping() {
         QMetaObject::invokeMethod(this, [=]() {
             this->station_mapping = data;
             this->metros = metros;
-            QVector<MetroStation> stations;
-            QVector<MetroSegment> segments;
-            for (auto &&mapping: data) {
+            for (auto &&mapping: station_mapping) {
                 QString station = QString("(%3)%1 - %2")
                         .arg(mapping.stationID)
                         .arg(mapping.name)
@@ -202,28 +268,7 @@ void MainWindow::load_station_mapping() {
                 ui->comboRouteFrom->addItem(station, mapping.stationID);
                 ui->comboRouteTo->addItem(station, mapping.stationID);
             }
-            int q = 0;
-            for (auto &_station : metros["A"]) {
-                auto &mapping = station_mapping[_station];
-                auto station = MetroStation{
-                        mapping.name,
-                        mapping.stationID,
-                        (q++) * 150.0,
-                        0,
-                        "A"
-                };
-                if (!stations.empty()) {
-                    auto lst_station = stations.last();
-                    segments << MetroSegment{
-                            lst_station.x, lst_station.y,
-                            station.x, station.y,
-                            MetroPainter::line_color_mapping(station.lineID),
-                            MetroPainter::line_color_mapping(station.lineID)
-                    };
-                }
-                stations << station;
-            }
-            metroWidgetRoute->setStations(stations, segments);
+            update_route_map("A");
         });
     });
     scheduler.schedule(task);
@@ -322,4 +367,52 @@ void MainWindow::update_flow_position(int position, bool force_update) {
 
 void MainWindow::on_comboBoxFlow_currentIndexChanged(int index) {
     update_flow_position(ui->sliderTime->value(), true);
+}
+
+void MainWindow::on_tableRoute_itemSelectionChanged() {
+    auto item = ui->tableRoute->currentItem();
+    update_route_map(
+            item->data(TABLE_LINE).toString(),
+            item->data(TABLE_STATION).toLongLong()
+    );
+}
+
+void MainWindow::update_route_map(QString line, long long highlight_station) {
+    QVector<MetroStation> stations;
+    QVector<MetroSegment> segments;
+    qreal c_x = 0, c_y = 0;
+    int q = 0;
+    for (auto &_station : metros[line]) {
+        auto &mapping = station_mapping[_station];
+        qreal x = (q++) * 100;
+        qreal y = 0;
+        if (mapping.stationID == highlight_station) {
+            c_x = x;
+            c_y = y;
+        }
+        auto station = MetroStation{
+                mapping.name,
+                mapping.stationID,
+                x,
+                y,
+                line
+        };
+        if (!stations.empty()) {
+            auto lst_station = stations.last();
+            segments << MetroSegment{
+                    lst_station.x, lst_station.y,
+                    station.x, station.y,
+                    MetroPainter::line_color_mapping(line),
+                    MetroPainter::line_color_mapping(line)
+            };
+        }
+        stations << station;
+    }
+    for (auto &&station:stations) {
+        if (station.id == highlight_station) {
+            station.lineID = "";
+        }
+    }
+    metroWidgetRoute->setStations(stations, segments);
+    metroWidgetRoute->set_camera_pos(c_x, c_y);
 }

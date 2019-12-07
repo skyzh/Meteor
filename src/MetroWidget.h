@@ -18,6 +18,7 @@ public:
 
     void setStations(QVector<MetroStation> stations, QVector<MetroSegment> segments);
 
+    void set_camera_pos(qreal x, qreal y);
 public slots:
     void animate();
 

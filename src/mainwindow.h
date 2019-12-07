@@ -18,6 +18,7 @@
 #include <QChartView>
 #include <QLineSeries>
 #include <QChart>
+#include <QTableWidgetItem>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -67,6 +68,12 @@ private:
     void load_station_mapping();
 
     void update_flow_position(int position, bool force_update = false);
+
+    void update_route_map(QString line, long long highlight_station = -1);
+
+    const int TABLE_STATION = Qt::UserRole + 1;
+    const int TABLE_LINE = Qt::UserRole + 2;
+
 private slots:
 
     void on_pushButtonRoutePlanning_clicked();
@@ -84,6 +91,8 @@ private slots:
     void on_sliderTime_sliderMoved(int position);
 
     void on_comboBoxFlow_currentIndexChanged(int index);
+
+    void on_tableRoute_itemSelectionChanged();
 
 public slots:
 

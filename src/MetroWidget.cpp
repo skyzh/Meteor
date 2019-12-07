@@ -39,3 +39,7 @@ void MetroWidget::setStations(QVector<MetroStation> stations, QVector<MetroSegme
     helper->setStations(stations, segments);
     update();
 }
+
+void MetroWidget::set_camera_pos(qreal x, qreal y) {
+    helper->set_camera_pos(x, y);
+}
