@@ -6,6 +6,7 @@
 #include "TaskFlowAnalysis.h"
 #include "TaskReadDataset.h"
 #include "TaskPlanRoute.h"
+#include "TaskInitDatabase.h"
 #include "utils.h"
 
 #include <QDateTime>
@@ -32,74 +33,97 @@ void TaskFlowAnalysis::run() {
 
     q.prepare(QUERY);
 
-    {
-        qulonglong failed_attempts = 0;
-        const qulonglong TIME_STEP = 3600;
+    qulonglong failed_attempts = 0;
+    const qulonglong TIME_STEP = 3600;
 
-        QMutexLocker l(&_data_mutex);
-        QMap<QString, FlowResult> mapping;
+    QMap<QString, FlowResult> mapping;
 
-        // [1] Initialize Flow Vector
-        emit message("Planning per-user route");
-        init_flow_data();
+    // [1] Initialize Flow Vector
+    emit message("Planning per-user route");
+    init_flow_data();
+    emit progress(0);
 
-        emit progress(0);
-        // [2] Fetch Data from Database
-        for (qulonglong time = start_time; time < end_time; time += TIME_STEP) {
-            emit message(get_timestamp_str(time));
-            q.bindValue(":start_time", time);
-            q.bindValue(":end_time", time + TIME_STEP);
-            if (!q.exec()) {
-                emit_sql_error("Query Error", q);
+    // [2] Fetch Data from Database
+    for (qulonglong time = start_time; time < end_time; time += TIME_STEP) {
+        emit message(get_timestamp_str(time));
+        q.bindValue(":start_time", time);
+        q.bindValue(":end_time", time + TIME_STEP);
+        if (!q.exec()) {
+            emit_sql_error("Query Error", q);
+            return;
+        }
+
+        while (q.next()) {
+            int status = q.value(4).toULongLong();
+            QString userID = q.value(5).toString().toLower();
+            unsigned long long stationID = q.value(2).toULongLong();
+            unsigned long long time = q.value(0).toULongLong();
+            if (stationID >= N) {
+                emit message("Invalid station ID");
+                emit success(false);
                 return;
             }
+            if (status == 1) {
+                mapping[userID] = FlowResult{
+                        time, 0,
+                        stationID, 0,
+                        userID
+                };
+            }
+            if (status == 0) {
+                if (mapping.count(userID) == 0) {
+                    ++failed_attempts;
+                } else {
+                    FlowResult flow_ = mapping[userID];
+                    mapping.remove(userID);
+                    flow_.exit_time = time;
+                    flow_.exit_station = stationID;
+                    data << flow_;
 
-            while (q.next()) {
-                int status = q.value(4).toULongLong();
-                QString userID = q.value(5).toString().toLower();
-                unsigned long long stationID = q.value(2).toULongLong();
-                unsigned long long time = q.value(0).toULongLong();
-                if (stationID >= N) {
-                    emit message("Invalid station ID");
-                    emit success(false);
-                    return;
+                    // [3] Process Flow Record
+                    process_flow_data(flow_);
                 }
-                if (status == 1) {
-                    mapping[userID] = FlowResult{
-                            time, 0,
-                            stationID, 0,
-                            userID
-                    };
-                }
-                if (status == 0) {
-                    if (mapping.count(userID) == 0) {
-                        ++failed_attempts;
-                    } else {
-                        FlowResult flow_ = mapping[userID];
-                        mapping.remove(userID);
-                        flow_.exit_time = time;
-                        flow_.exit_station = stationID;
-                        data << flow_;
+            }
+        }
+        if (_cancel) break;
+        emit progress(double(time - start_time) / (end_time - start_time));
+    }
 
-                        // [3] Process Flow Record
-                        process_flow_data(flow_);
+    // [4] Commit to Database
+    emit message("Commit to database");
+
+    db.transaction();
+
+    const QString INSERT_QUERY = "insert into flow (start_time, enter_station_id, exit_station_id, time_block, flow) values (?,?,?,?,?)";
+
+    q.prepare(INSERT_QUERY);
+
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            int _size = flow[i][j].size();
+            for (int tb = 0; tb < _size; tb++) {
+                if (flow[i][j][tb] != 0) {
+                    q.bindValue(0, start_time);
+                    q.bindValue(1, i);
+                    q.bindValue(2, j);
+                    q.bindValue(3, tb);
+                    q.bindValue(4, flow[i][j][tb]);
+                    if (!q.exec()) {
+                        emit_sql_error("Error while updating table", q);
+                        return;
                     }
                 }
             }
-            if (_cancel) break;
-            emit progress(double(time - start_time) / (end_time - start_time));
         }
-
-        emit message("Post-processing");
-
-        // [4] Process Flow per hour
-        if (!_cancel) postprocess_flow_data();
     }
 
     if (_cancel) {
-        emit success(false);
+        db.rollback();
     } else {
-        emit result();
+        if (!db.commit()) {
+            emit_db_error("Error when commit", db);
+            return;
+        }
         emit success(true);
     }
 
@@ -107,15 +131,23 @@ void TaskFlowAnalysis::run() {
 }
 
 QString TaskFlowAnalysis::name() {
-    return "flow_analysis";
+    QDateTime timestamp;
+    timestamp.setTime_t(start_time);
+    return QString("flow_analysis_%1")
+            .arg(timestamp.toString("yyyy-MM-dd"));
 }
 
 QList<Task *> TaskFlowAnalysis::dependencies() {
-    return TaskReadDataset::from_time_range(start_time, end_time, this);
+    auto deps = TaskReadDataset::from_time_range(start_time, end_time, this, true);
+    deps.push_front(new TaskInitDatabase);
+    return deps;
 }
 
 QString TaskFlowAnalysis::display_name() {
-    return "Flow Analysis";
+    QDateTime timestamp;
+    timestamp.setTime_t(start_time);
+    return QString("Flow Analysis %1")
+            .arg(timestamp.toString("yyyy-MM-dd"));
 }
 
 TaskFlowAnalysis::~TaskFlowAnalysis() {
@@ -126,16 +158,15 @@ bool TaskFlowAnalysis::parse_args() {
     {
         QDateTime timestamp;
         timestamp.setTime_t(get_arg(0).toUInt());
-        timestamp.setTime(QTime(0, 0));
+        timestamp.setTime(QTime(4, 0));
         start_time = timestamp.toSecsSinceEpoch();
     }
     {
         QDateTime timestamp;
         timestamp.setTime_t(get_arg(1).toUInt());
-        timestamp.setTime(QTime(0, 0));
+        timestamp.setTime(QTime(4, 0));
         end_time = timestamp.toSecsSinceEpoch();
     }
-    time_div = get_arg(2).toULongLong();
     return true;
 }
 
@@ -164,10 +195,9 @@ void TaskFlowAnalysis::init_flow_data() {
             }
         }
     }
-    flow_per_hour = flow;
 }
 
-void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flow_) {
+void TaskFlowAnalysis::process_flow_data(const FlowResult &flow_) {
     qulonglong enter_time_block = (flow_.enter_time - start_time) / time_div,
             exit_time_block = (flow_.exit_time - start_time) / time_div;
     qulonglong time_block_cnt = exit_time_block - enter_time_block;
@@ -185,6 +215,7 @@ void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flo
     }
 }
 
+/*
 QVector<unsigned long long> TaskFlowAnalysis::get_flow_time() {
     QMutexLocker l(&_data_mutex);
     return flow_time;
@@ -214,4 +245,10 @@ void TaskFlowAnalysis::postprocess_flow_data() {
             }
         }
     }
+}
+
+ */
+
+bool TaskFlowAnalysis::journal() {
+    return true;
 }
