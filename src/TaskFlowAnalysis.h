@@ -6,9 +6,10 @@
 #define METRO_TASKFLOWANALYSIS_H
 
 #include "Task.h"
+#include <QVector>
 
 class TaskFlowAnalysis : public Task {
-    Q_OBJECT
+Q_OBJECT
 public:
     TaskFlowAnalysis(QObject *parent = nullptr);
 
@@ -30,16 +31,27 @@ public:
         QString userID;
     };
 
-    QList<FlowResult> get_data();
+    QVector<FlowResult> get_data();
 
 private:
-    long long start_time;
-    long long end_time;
+    unsigned long long start_time;
+    unsigned long long end_time;
+    unsigned long long time_div;
 
     QMutex _data_mutex;
-    QList<FlowResult> data;
+    QVector<FlowResult> data;
+    QVector<QVector<QVector<unsigned long long>>> flow;
+    QVector<QVector<QList<qulonglong>>> route_cache;
+    QVector<unsigned long long> flow_time;
+
+    void init_flow_data();
+
+    void process_flow_data(const FlowResult &flow_);
+
+    unsigned N;
 
 signals:
+
     void result();
 
 protected:

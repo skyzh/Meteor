@@ -5,6 +5,7 @@
 #include "db.h"
 #include "TaskFlowAnalysis.h"
 #include "TaskReadDataset.h"
+#include "TaskPlanRoute.h"
 #include "utils.h"
 
 #include <QDateTime>
@@ -34,8 +35,16 @@ void TaskFlowAnalysis::run() {
     {
         qulonglong failed_attempts = 0;
         const qulonglong TIME_STEP = 3600;
+
         QMutexLocker l(&_data_mutex);
         QMap<QString, FlowResult> mapping;
+
+        // [1] Initialize Flow Vector
+        emit message("Planning per-user route");
+        init_flow_data();
+
+        emit progress(0);
+        // [2] Fetch Data from Database
         for (qulonglong time = start_time; time < end_time; time += TIME_STEP) {
             emit message(get_timestamp_str(time));
             q.bindValue(":start_time", time);
@@ -44,11 +53,17 @@ void TaskFlowAnalysis::run() {
                 emit_sql_error("Query Error", q);
                 return;
             }
+
             while (q.next()) {
                 int status = q.value(4).toULongLong();
                 QString userID = q.value(5).toString().toLower();
                 unsigned long long stationID = q.value(2).toULongLong();
                 unsigned long long time = q.value(0).toULongLong();
+                if (stationID >= N) {
+                    emit message("Invalid station ID");
+                    emit success(false);
+                    return;
+                }
                 if (status == 1) {
                     mapping[userID] = FlowResult{
                             time, 0,
@@ -60,11 +75,14 @@ void TaskFlowAnalysis::run() {
                     if (mapping.count(userID) == 0) {
                         ++failed_attempts;
                     } else {
-                        FlowResult flow = mapping[userID];
+                        FlowResult flow_ = mapping[userID];
                         mapping.remove(userID);
-                        flow.exit_time = time;
-                        flow.exit_station = stationID;
-                        data << flow;
+                        flow_.exit_time = time;
+                        flow_.exit_station = stationID;
+                        data << flow_;
+
+                        // [3] Process Flow Record
+                        process_flow_data(flow_);
                     }
                 }
             }
@@ -78,6 +96,17 @@ void TaskFlowAnalysis::run() {
     } else {
         emit result();
         emit success(true);
+    }
+
+    for (int k = 0; k < flow_time.size(); k++) {
+        qDebug() << k;
+        for (int i = 0; i < N; i++) {
+            QStringList flow__;
+            for (int j = 0; j < N; j++) {
+                flow__ << QString("%1").arg(flow[i][j][k]);
+            }
+            qDebug() << flow__;
+        }
     }
 
     db.close();
@@ -99,8 +128,8 @@ TaskFlowAnalysis::~TaskFlowAnalysis() {
 
 }
 
-QList<TaskFlowAnalysis::FlowResult> TaskFlowAnalysis::get_data() {
-    return QList<TaskFlowAnalysis::FlowResult>();
+QVector<TaskFlowAnalysis::FlowResult> TaskFlowAnalysis::get_data() {
+    return QVector<TaskFlowAnalysis::FlowResult>();
 }
 
 bool TaskFlowAnalysis::parse_args() {
@@ -116,5 +145,51 @@ bool TaskFlowAnalysis::parse_args() {
         timestamp.setTime(QTime(0, 0));
         end_time = timestamp.toSecsSinceEpoch();
     }
+    time_div = get_arg(2).toULongLong();
     return true;
+}
+
+void TaskFlowAnalysis::init_flow_data() {
+    auto mat = TaskPlanRoute::get_route_mapping();
+    N = mat.size();
+    route_cache.clear();
+    for (int i = 0; i < N; i++) {
+        route_cache.push_back({});
+        for (int j = 0; j < N; j++) {
+            route_cache[i].push_back(TaskPlanRoute::plan_route(mat, N, i, j));
+        }
+    }
+
+    flow.clear();
+    flow_time.clear();
+    for (qulonglong time = start_time; time <= end_time; time += time_div) {
+        flow_time << time;
+    }
+    for (int i = 0; i < N; i++) {
+        flow.push_back({});
+        for (int j = 0; j < N; j++) {
+            flow[i].push_back({});
+            for (qulonglong time = start_time; time <= end_time; time += time_div) {
+                flow[i][j] << 0;
+            }
+        }
+    }
+}
+
+void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flow_) {
+    qulonglong enter_time_block = (flow_.enter_time - start_time) / time_div,
+            exit_time_block = (flow_.exit_time - start_time) / time_div;
+    qulonglong time_block_cnt = exit_time_block - enter_time_block;
+    qulonglong lst_time_block = enter_time_block;
+    auto &route = route_cache[flow_.enter_station][flow_.exit_station];
+    int route_size = route.size() - 1;
+    for (int i = 0; i < route_size; i++) {
+        qulonglong current_time_block = double(i) / route_size * time_block_cnt + enter_time_block;
+        auto route_enter = route[i];
+        auto route_exit = route[i + 1];
+        for (qulonglong tb = lst_time_block; tb <= current_time_block; tb++) {
+            ++flow[route_enter][route_exit][tb];
+        }
+        lst_time_block = current_time_block + 1;
+    }
 }
