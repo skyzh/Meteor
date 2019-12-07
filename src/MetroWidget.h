@@ -16,7 +16,7 @@ public:
 
     virtual ~MetroWidget();
 
-    void setStations(QList<MetroStation> stations, QList<MetroSegment> segments);
+    void setStations(QVector<MetroStation> stations, QVector<MetroSegment> segments);
 
 public slots:
     void animate();

@@ -30,8 +30,8 @@ private:
     QFont textFont;
     QPen segmentPen;
     qreal CAMERA_X, CAMERA_Y;
-    QList<MetroStation> stations;
-    QList<MetroSegment> segments;
+    QVector<MetroStation> stations;
+    QVector<MetroSegment> segments;
 
     const int DEFAULT_SEGMENT_WIDTH = 8.0;
 
@@ -51,8 +51,8 @@ public:
     void set_camera_pos(qreal x, qreal y);
 
     void setStations(
-            QList<MetroStation> stations,
-            QList<MetroSegment> segments);
+            QVector<MetroStation> stations,
+            QVector<MetroSegment> segments);
 
     static QColor line_color_mapping(QString line);
 };

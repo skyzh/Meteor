@@ -172,12 +172,12 @@ void MainWindow::on_actionFlow_triggered() {
 void MainWindow::load_station_mapping() {
     TaskGetMapping *task = new TaskGetMapping(this);
     connect(task, &TaskGetMapping::result, [=]() {
-        QList<TaskGetMapping::Mapping> data = task->get_data();
+        QVector<TaskGetMapping::Mapping> data = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
             this->station_mapping = data;
-            QList<MetroStation> stations;
-            QList<MetroSegment> segments;
+            QVector<MetroStation> stations;
+            QVector<MetroSegment> segments;
             int q = 0;
             for (auto &&mapping: data) {
                 QString station = QString("(%3)%1 - %2")

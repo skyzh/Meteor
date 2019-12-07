@@ -56,7 +56,7 @@ QString TaskGetMapping::display_name() {
     return "Get Station Name";
 }
 
-QList<TaskGetMapping::Mapping> TaskGetMapping::get_data() {
+QVector<TaskGetMapping::Mapping> TaskGetMapping::get_data() {
     QMutexLocker l(&_data_mutex);
     return data;
 }

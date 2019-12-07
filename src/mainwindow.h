@@ -52,7 +52,7 @@ private:
     MetroWidget *metroWidget;
     MetroPainter metroPainter;
 
-    QList<TaskGetMapping::Mapping> station_mapping;
+    QVector<TaskGetMapping::Mapping> station_mapping;
 
     void load_station_mapping();
 

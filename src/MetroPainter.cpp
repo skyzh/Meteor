@@ -100,7 +100,7 @@ void MetroPainter::set_camera_pos(qreal x, qreal y) {
     CAMERA_Y = y;
 }
 
-void MetroPainter::setStations(QList<MetroStation> stations, QList<MetroSegment> segments) {
+void MetroPainter::setStations(QVector<MetroStation> stations, QVector<MetroSegment> segments) {
     this->stations = stations;
     this->segments = segments;
     calc_camera_bound();

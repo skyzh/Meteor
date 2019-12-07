@@ -7,6 +7,7 @@
 
 #include "Task.h"
 #include <QStringList>
+#include <QVector>
 
 class TaskGetMapping : public Task {
 Q_OBJECT
@@ -30,11 +31,11 @@ public:
         QString chnName;
     };
 
-    QList<Mapping> get_data();
+    QVector<Mapping> get_data();
 
 
 private:
-    QList<Mapping> data;
+    QVector<Mapping> data;
 
     QMutex _data_mutex;
 
