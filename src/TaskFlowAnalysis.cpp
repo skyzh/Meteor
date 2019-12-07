@@ -5,16 +5,10 @@
 #include "db.h"
 #include "TaskFlowAnalysis.h"
 #include "TaskReadDataset.h"
+#include "utils.h"
 
 #include <QDateTime>
 #include <QDebug>
-
-QString get_timestamp_str(unsigned int tsp) {
-    QDateTime timestamp;
-    timestamp.setTime_t(tsp);
-    return timestamp.toString(Qt::SystemLocaleShortDate);
-}
-
 
 TaskFlowAnalysis::TaskFlowAnalysis(QObject *parent) : Task(parent) {
 
@@ -43,6 +37,7 @@ void TaskFlowAnalysis::run() {
         QMutexLocker l(&_data_mutex);
         QMap<QString, FlowResult> mapping;
         for (qulonglong time = start_time; time < end_time; time += TIME_STEP) {
+            emit message(get_timestamp_str(time));
             q.bindValue(":start_time", time);
             q.bindValue(":end_time", time + TIME_STEP);
             if (!q.exec()) {

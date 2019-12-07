@@ -6,6 +6,7 @@
 #include <QVariantList>
 #include <QVariant>
 #include <QList>
+#include <QDateTime>
 
 class Task : public QThread {
 Q_OBJECT

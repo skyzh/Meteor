@@ -15,26 +15,26 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5 COMPONENTS Widgets Sql Charts REQUIRED)
 
 add_executable(Meteor
-        db.cpp
-        db.h
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        Task.cpp
-        Task.h
-        TaskDelay.cpp
-        TaskDelay.h
-        TaskReadDataset.cpp
-        TaskReadDataset.h
-        TaskScheduler.cpp
-        TaskScheduler.h
-        mainwindow.ui
-        TaskQueryEntryExit.cpp
-        TaskQueryEntryExit.h
-        TaskAddTimestamp.cpp
-        TaskAddTimestamp.h
-        TaskInitDatabase.cpp
-        TaskInitDatabase.h
-        main.mm TaskPlanRoute.cpp TaskPlanRoute.h ConfigManager.cpp ConfigManager.h MetroWidget.cpp MetroWidget.h MetroPainter.cpp MetroPainter.h TaskGetMapping.cpp TaskGetMapping.h TaskFlowAnalysis.cpp TaskFlowAnalysis.h)
+        src/db.cpp
+        src/db.h
+        src/main.cpp
+        src/mainwindow.cpp
+        src/mainwindow.h
+        src/Task.cpp
+        src/Task.h
+        src/TaskDelay.cpp
+        src/TaskDelay.h
+        src/TaskReadDataset.cpp
+        src/TaskReadDataset.h
+        src/TaskScheduler.cpp
+        src/TaskScheduler.h
+        src/mainwindow.ui
+        src/TaskQueryEntryExit.cpp
+        src/TaskQueryEntryExit.h
+        src/TaskAddTimestamp.cpp
+        src/TaskAddTimestamp.h
+        src/TaskInitDatabase.cpp
+        src/TaskInitDatabase.h
+        src/main.mm src/TaskPlanRoute.cpp src/TaskPlanRoute.h src/ConfigManager.cpp src/ConfigManager.h src/MetroWidget.cpp src/MetroWidget.h src/MetroPainter.cpp src/MetroPainter.h src/TaskGetMapping.cpp src/TaskGetMapping.h src/TaskFlowAnalysis.cpp src/TaskFlowAnalysis.h src/utils.cpp src/utils.h)
 
 target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
