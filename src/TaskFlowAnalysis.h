@@ -32,6 +32,9 @@ public:
     };
 
     QVector<QVector<QVector<unsigned long long>>> get_flow_result();
+
+    QVector<QVector<QVector<unsigned long long>>> get_flow_per_hour_result();
+
     QVector<unsigned long long> get_flow_time();
 
 private:
@@ -42,12 +45,15 @@ private:
     QMutex _data_mutex;
     QVector<FlowResult> data;
     QVector<QVector<QVector<unsigned long long>>> flow;
+    QVector<QVector<QVector<unsigned long long>>> flow_per_hour;
     QVector<QVector<QList<qulonglong>>> route_cache;
     QVector<unsigned long long> flow_time;
 
     void init_flow_data();
 
     void process_flow_data(const FlowResult &flow_);
+
+    void postprocess_flow_data();
 
     unsigned N;
 

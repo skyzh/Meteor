@@ -89,6 +89,11 @@ void TaskFlowAnalysis::run() {
             if (_cancel) break;
             emit progress(double(time - start_time) / (end_time - start_time));
         }
+
+        emit message("Post-processing");
+
+        // [4] Process Flow per hour
+        if (!_cancel) postprocess_flow_data();
     }
 
     if (_cancel) {
@@ -159,6 +164,7 @@ void TaskFlowAnalysis::init_flow_data() {
             }
         }
     }
+    flow_per_hour = flow;
 }
 
 void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flow_) {
@@ -175,7 +181,7 @@ void TaskFlowAnalysis::process_flow_data(const TaskFlowAnalysis::FlowResult &flo
         for (qulonglong tb = lst_time_block; tb <= current_time_block; tb++) {
             ++flow[route_enter][route_exit][tb];
         }
-        lst_time_block = current_time_block + 1;
+        lst_time_block = current_time_block;
     }
 }
 
@@ -187,4 +193,25 @@ QVector<unsigned long long> TaskFlowAnalysis::get_flow_time() {
 QVector<QVector<QVector<unsigned long long>>> TaskFlowAnalysis::get_flow_result() {
     QMutexLocker l(&_data_mutex);
     return flow;
+}
+
+QVector<QVector<QVector<unsigned long long>>> TaskFlowAnalysis::get_flow_per_hour_result() {
+    QMutexLocker l(&_data_mutex);
+    return flow_per_hour;
+}
+
+void TaskFlowAnalysis::postprocess_flow_data() {
+    const int window_size = 3600 / time_div;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            qulonglong sum = 0;
+            int _size = flow[i][j].size();
+            for (int tb = 0; tb < _size; tb++) {
+                int sub = tb - window_size;
+                sum += flow[i][j][tb];
+                if (sub >= 0) sum -= flow[i][j][sub];
+                flow_per_hour[i][j][tb] = sum;
+            }
+        }
+    }
 }
