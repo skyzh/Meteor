@@ -89,6 +89,12 @@ void TaskQueryEntryExit::run() {
                     q.value(2).toULongLong()
             };
         }
+        for (unsigned long long i = lst_time_0; i <= _ett; i++) {
+            data << EntryExitResult{i * time_div, 0, 0};
+        }
+        for (unsigned long long i = lst_time_1; i <= _ett; i++) {
+            data << EntryExitResult{i * time_div, 1, 0};
+        }
     }
 
     emit result();
@@ -125,7 +131,7 @@ bool TaskQueryEntryExit::parse_args() {
 }
 
 QList<Task *> TaskQueryEntryExit::dependencies() {
-    return TaskReadDataset::from_time_range(start_time, end_time, this);
+    return TaskReadDataset::from_time_range(start_time, end_time - 1, this, true);
 }
 
 QVector<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {

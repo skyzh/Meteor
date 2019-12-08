@@ -131,7 +131,7 @@ QList<Task *> TaskReadDataset::dependencies() {
 
 QList<Task *>
 TaskReadDataset::from_time_range(qulonglong start_time, qulonglong end_time, QObject *parent, bool include_tail) {
-    if (include_tail) ++end_time;
+    if (include_tail) end_time += 86400;
     QList<Task *> dependencies;
     for (unsigned long long time = start_time; time < end_time; time += 86400) {
         QDateTime timestamp;
