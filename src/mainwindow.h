@@ -19,6 +19,7 @@
 #include <QLineSeries>
 #include <QChart>
 #include <QTableWidgetItem>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -57,6 +58,8 @@ private:
     MetroPainter metroRoutePainter;
     MetroPainter metroFlowPainter;
 
+    QTimer *delayed_chart_update;
+
     QVector<TaskGetMapping::Mapping> station_mapping;
     QMap<QString, QList<qulonglong>> metros;
 
@@ -70,6 +73,8 @@ private:
     void update_flow_position(int position, bool force_update = false);
 
     void update_route_map(QString line, long long highlight_station = -1);
+
+    void update_passenger_chart();
 
     const int TABLE_STATION = Qt::UserRole + 1;
     const int TABLE_LINE = Qt::UserRole + 2;
@@ -93,6 +98,14 @@ private slots:
     void on_comboBoxFlow_currentIndexChanged(int index);
 
     void on_tableRoute_itemSelectionChanged();
+
+    void on_radioButtonDaily_toggled(bool checked);
+
+    void on_radioButtonHourly_toggled(bool checked);
+
+    void on_radioButtonCustom_toggled(bool checked);
+
+    void on_fromTime_dateTimeChanged(const QDateTime &dateTime);
 
 public slots:
 

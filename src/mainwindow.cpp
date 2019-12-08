@@ -29,6 +29,13 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBoxFlow->addItem("C - Line 2 (Liangzhu - Chaoyang)", "C");
     }
 
+    delayed_chart_update = new QTimer(this);
+
+    connect(delayed_chart_update, &QTimer::timeout, this, [=] {
+        delayed_chart_update->stop();
+        update_passenger_chart();
+    });
+
     metroWidgetRoute = new MetroWidget(&metroRoutePainter, this);
     metroWidgetFlow = new MetroWidget(&metroFlowPainter, this);
     ui->layoutRoute->addWidget(metroWidgetRoute, 0, 1);
@@ -105,6 +112,8 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
     connect(chartView, &MetroChartView::request_data, this, [=]() {
         ui->fromTime->setDateTime(axisX->min());
         ui->toTime->setDateTime(axisX->max());
+        delayed_chart_update->stop();
+        delayed_chart_update->start(500);
     });
 }
 
@@ -193,38 +202,7 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
 }
 
 void MainWindow::on_pushButtonQuery_clicked() {
-    long long start = ui->fromTime->dateTime().toSecsSinceEpoch();
-    long long end = ui->toTime->dateTime().toSecsSinceEpoch();
-    long long time_div = 3600;
-    if (end - start <= 60 * 60 * 12) time_div = 300;
-    if (end - start <= 60 * 60 * 1) time_div = 30;
-    if (end - start <= 60) time_div = 1;
-    TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
-    task->args({
-                       time_div,
-                       start,
-                       end,
-                       ui->comboLine->currentData(),
-                       ui->comboStation->currentData()
-               });
-
-    connect(task, &TaskQueryEntryExit::result, [=]() {
-        QVector<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
-
-        QMetaObject::invokeMethod(this, [=]() {
-            QLineSeries *in_series = new QLineSeries;
-            QLineSeries *out_series = new QLineSeries;
-
-            for (auto &&record : data) {
-                if (record.status == 0)
-                    in_series->append(record.timestamp * 1000, record.count);
-                if (record.status == 1)
-                    out_series->append(record.timestamp * 1000, record.count);
-            }
-            setup_chart({in_series, out_series});
-        });
-    });
-    scheduler.schedule(task);
+    update_passenger_chart();
 }
 
 void MainWindow::tb_buttonTabQuery_clicked() {
@@ -384,7 +362,7 @@ void MainWindow::update_route_map(QString line, long long highlight_station) {
     int q = 0;
     for (auto &_station : metros[line]) {
         auto &mapping = station_mapping[_station];
-        qreal x = (q++) * 100;
+        qreal x = (q++) * 50;
         qreal y = 0;
         if (mapping.stationID == highlight_station) {
             c_x = x;
@@ -415,4 +393,69 @@ void MainWindow::update_route_map(QString line, long long highlight_station) {
     }
     metroWidgetRoute->setStations(stations, segments);
     metroWidgetRoute->set_camera_pos(c_x, c_y);
+}
+
+void MainWindow::update_passenger_chart() {
+    if (scheduler.running()) return;
+    long long start = ui->fromTime->dateTime().toSecsSinceEpoch();
+    long long end = ui->toTime->dateTime().toSecsSinceEpoch();
+    long long time_div = 720;
+    if (end - start <= 60 * 60 * 12) time_div = 300;
+    if (end - start <= 60 * 60 * 1) time_div = 30;
+    if (end - start <= 60) time_div = 1;
+    TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
+    task->args({
+                       time_div,
+                       start,
+                       end,
+                       ui->comboLine->currentData(),
+                       ui->comboStation->currentData()
+               });
+
+    connect(task, &TaskQueryEntryExit::result, [=]() {
+        QVector<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
+
+        QMetaObject::invokeMethod(this, [=]() {
+            QLineSeries *in_series = new QLineSeries;
+            QLineSeries *out_series = new QLineSeries;
+
+            for (auto &&record : data) {
+                if (record.status == 0)
+                    in_series->append(record.timestamp * 1000, record.count);
+                if (record.status == 1)
+                    out_series->append(record.timestamp * 1000, record.count);
+            }
+            setup_chart({in_series, out_series});
+        });
+    });
+    scheduler.schedule(task);
+}
+
+void MainWindow::on_radioButtonDaily_toggled(bool checked) {
+    if (checked) {
+        ui->toTime->setDateTime(ui->fromTime->dateTime().addSecs(86400));
+    }
+}
+
+void MainWindow::on_radioButtonHourly_toggled(bool checked) {
+    if (checked) {
+        ui->toTime->setDateTime(ui->fromTime->dateTime().addSecs(3600));
+    }
+}
+
+void MainWindow::on_radioButtonCustom_toggled(bool checked) {
+    if (checked) {
+        ui->toTime->setEnabled(true);
+    } else {
+        ui->toTime->setEnabled(false);
+    }
+}
+
+void MainWindow::on_fromTime_dateTimeChanged(const QDateTime &dateTime) {
+    if (ui->radioButtonDaily->isChecked()) {
+        ui->toTime->setDateTime(dateTime.addSecs(86400));
+    }
+    if (ui->radioButtonHourly->isChecked()) {
+        ui->toTime->setDateTime(dateTime.addSecs(3600));
+    }
 }

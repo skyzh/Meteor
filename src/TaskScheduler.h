@@ -55,6 +55,8 @@ public:
     void schedule(Task *task);
 
     ~TaskScheduler() override;
+
+    bool running();
 };
 
 #endif // TASKSCHEDULER_H

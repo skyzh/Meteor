@@ -188,3 +188,8 @@ void TaskScheduler::resolve(Task *task) {
     tasks << task;
     ++task_cnt_total;
 }
+
+bool TaskScheduler::running() {
+    QMutexLocker l(&_tasks_mutex);
+    return task_running;
+}
