@@ -131,7 +131,7 @@ bool TaskQueryEntryExit::parse_args() {
 }
 
 QList<Task *> TaskQueryEntryExit::dependencies() {
-    return TaskReadDataset::from_time_range(start_time, end_time - 1, this, true);
+    return TaskReadDataset::from_time_range(start_time, end_time, this);
 }
 
 QVector<TaskQueryEntryExit::EntryExitResult> TaskQueryEntryExit::get_data() {

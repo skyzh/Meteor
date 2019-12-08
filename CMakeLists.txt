@@ -35,6 +35,6 @@ add_executable(Meteor
         src/TaskAddTimestamp.h
         src/TaskInitDatabase.cpp
         src/TaskInitDatabase.h
-        src/main.mm src/TaskPlanRoute.cpp src/TaskPlanRoute.h src/ConfigManager.cpp src/ConfigManager.h src/MetroWidget.cpp src/MetroWidget.h src/MetroPainter.cpp src/MetroPainter.h src/TaskGetMapping.cpp src/TaskGetMapping.h src/TaskFlowAnalysis.cpp src/TaskFlowAnalysis.h src/utils.cpp src/utils.h src/main.h src/MetroChartView.cpp src/MetroChartView.h src/TaskQueryFlow.cpp src/TaskQueryFlow.h)
+        src/main.mm src/TaskPlanRoute.cpp src/TaskPlanRoute.h src/ConfigManager.cpp src/ConfigManager.h src/MetroWidget.cpp src/MetroWidget.h src/MetroPainter.cpp src/MetroPainter.h src/TaskGetMapping.cpp src/TaskGetMapping.h src/TaskFlowAnalysis.cpp src/TaskFlowAnalysis.h src/utils.cpp src/utils.h src/main.h src/MetroChartView.cpp src/MetroChartView.h src/TaskQueryFlow.cpp src/TaskQueryFlow.h src/TaskSmartTravel.cpp src/TaskSmartTravel.h src/TaskQuerySmartTravel.cpp src/TaskQuerySmartTravel.h src/TaskBaseFlowAnalysis.cpp src/TaskBaseFlowAnalysis.h)
 
 target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")

@@ -45,7 +45,7 @@ bool TaskQueryFlow::journal() {
 }
 
 QList<Task *> TaskQueryFlow::dependencies() {
-    auto task = new TaskFlowAnalysis;
+    auto task = new TaskFlowAnalysis(this);
     task->args({start_time, end_time});
     return {task};
 }
@@ -86,8 +86,21 @@ void TaskQueryFlow::run() {
     }
 
     while (q.next()) {
-        flow[q.value(1).toLongLong()][q.value(2).toLongLong()][q.value(3).toLongLong()]
-                = q.value(4).toLongLong();
+        auto &flow_ = flow[q.value(1).toLongLong()][q.value(2).toLongLong()][q.value(3).toLongLong()];
+        auto result = q.value(4).toLongLong();
+        if (flow_ != 0) {
+            if (flow_ != result) {
+                emit message("Inconsistent flow data");
+                emit success(false);
+                return;
+            } else {
+                emit message("Duplicate flow data");
+                emit success(false);
+                return;
+            }
+        } else {
+            flow_ = result;
+        }
     }
 
     if (_cancel) return;
@@ -126,7 +139,7 @@ TaskQueryFlow::TaskQueryFlow(QObject *parent) : Task(parent) {
 void TaskQueryFlow::init_flow_data() {
     auto mat = TaskPlanRoute::get_route_mapping();
     N = mat.size();
-    TaskFlowAnalysis::init_flow_time(flow_time, start_time, end_time, time_div);
-    TaskFlowAnalysis::init_flow_matrix(flow, N, start_time, end_time, time_div);
-    TaskFlowAnalysis::init_flow_matrix(flow_per_hour, N, start_time, end_time, time_div);
+    TaskBaseFlowAnalysis::init_flow_time(flow_time, start_time, end_time, time_div);
+    TaskBaseFlowAnalysis::init_flow_matrix(flow, N, start_time, end_time, time_div);
+    TaskBaseFlowAnalysis::init_flow_matrix(flow_per_hour, N, start_time, end_time, time_div);
 }

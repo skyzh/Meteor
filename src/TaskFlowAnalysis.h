@@ -5,61 +5,31 @@
 #ifndef METRO_TASKFLOWANALYSIS_H
 #define METRO_TASKFLOWANALYSIS_H
 
-#include "Task.h"
-#include <QVector>
+#include "TaskBaseFlowAnalysis.h"
 
-struct FlowResult {
-    unsigned long long enter_time;
-    unsigned long long exit_time;
-    unsigned long long enter_station;
-    unsigned long long exit_station;
-    QString userID;
-};
-
-class TaskFlowAnalysis : public Task {
-Q_OBJECT
+class TaskFlowAnalysis : public TaskBaseFlowAnalysis {
 public:
-    TaskFlowAnalysis(QObject *parent = nullptr);
-
-    void run() override;
+    TaskFlowAnalysis(QObject *parent);
 
     bool journal() override;
 
     QString name() override;
 
-    QList<Task *> dependencies() override;
-
     QString display_name() override;
 
     ~TaskFlowAnalysis() override;
 
+protected:
+    bool init_flow_data(QSqlQuery& q) override;
 
-    static void init_flow_time(QVector<unsigned long long> &flow_time, unsigned long long start_time,
-                               unsigned long long end_time, unsigned long long time_div);
+    bool process_flow_data(const FlowResult &flow_) override;
 
-    static void init_flow_matrix(QVector<QVector<QVector<unsigned long long>>> &flow, unsigned N,
-                                 unsigned long long start_time,
-                                 unsigned long long end_time, unsigned long long time_div);
+    bool commit_to_database(QSqlQuery &q) override;
 
 private:
-    unsigned long long start_time;
-    unsigned long long end_time;
-    const unsigned long long time_div = 60;
-
-    QVector<FlowResult> data;
     QVector<QVector<QVector<unsigned long long>>> flow;
     QVector<QVector<QList<qulonglong>>> route_cache;
     QVector<unsigned long long> flow_time;
-
-    void init_flow_data();
-
-    void process_flow_data(const FlowResult &flow_);
-
-    unsigned N;
-
-protected:
-    bool parse_args() override;
 };
-
 
 #endif //METRO_TASKFLOWANALYSIS_H
