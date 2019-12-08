@@ -30,6 +30,7 @@ private:
     QVector<QVector<QVector<unsigned long long>>> flow;
     QVector<QVector<QList<qulonglong>>> route_cache;
     QVector<unsigned long long> flow_time;
+    const unsigned long long time_div = 60;
 };
 
 #endif //METRO_TASKFLOWANALYSIS_H

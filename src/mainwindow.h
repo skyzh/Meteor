@@ -10,6 +10,7 @@
 #include "TaskGetMapping.h"
 #include "TaskFlowAnalysis.h"
 #include "TaskQueryFlow.h"
+#include "TaskSmartTravel.h"
 #include "MetroChartView.h"
 
 #include <QMainWindow>

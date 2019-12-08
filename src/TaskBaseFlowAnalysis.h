@@ -46,7 +46,6 @@ public:
 protected:
     unsigned long long start_time;
     unsigned long long end_time;
-    const unsigned long long time_div = 60;
 
     virtual bool init_flow_data(QSqlQuery& q);
 

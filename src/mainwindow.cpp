@@ -28,6 +28,15 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBoxFlow->addItem("B - Line 1 (Xianghu - Xiasha Jiangbin)", "B2");
         ui->comboBoxFlow->addItem("C - Line 2 (Liangzhu - Chaoyang)", "C");
     }
+    {
+        ui->comboBoxSmartWeekday->addItem("Monday", "2019-01-07");
+        ui->comboBoxSmartWeekday->addItem("Tuesday", "2019-01-08");
+        ui->comboBoxSmartWeekday->addItem("Wednesday", "2019-01-09");
+        ui->comboBoxSmartWeekday->addItem("Thursday", "2019-01-10");
+        ui->comboBoxSmartWeekday->addItem("Friday", "2019-01-11");
+        ui->comboBoxSmartWeekday->addItem("Saturday", "2019-01-12");
+        ui->comboBoxSmartWeekday->addItem("Sunday", "2019-01-13");
+    }
 
     delayed_chart_update = new QTimer(this);
 
@@ -121,6 +130,10 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
     auto task = new TaskPlanRoute(this);
     task->args({ui->comboRouteFrom->currentData(), ui->comboRouteTo->currentData()});
     scheduler.schedule(task);
+    auto smart_travel_task = new TaskSmartTravel(this);
+    auto flow_begin = QDateTime(QDate(2019, 1, 9)).toSecsSinceEpoch();
+    smart_travel_task->args({ flow_begin, flow_begin + 86400 });
+    scheduler.schedule(smart_travel_task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
         if (station_mapping.empty()) return;
@@ -257,7 +270,7 @@ void MainWindow::on_pushButtonFlow_clicked() {
     auto task = new TaskQueryFlow(this);
     flow_date_time = ui->flowDate->dateTime();
     auto flow_begin = flow_date_time.toSecsSinceEpoch();
-    task->args({flow_begin, flow_begin + 86400, 60});
+    task->args({flow_begin, flow_begin + 86400 });
     connect(task, &TaskQueryFlow::result, [=]() {
         auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();

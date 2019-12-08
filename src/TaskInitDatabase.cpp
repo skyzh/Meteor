@@ -74,6 +74,26 @@ void TaskInitDatabase::run() {
         return;
     }
 
+    // [3] Create smart_travel table
+
+    const QString SMART_INIT = \
+            "create table smart_travel (start_time int, enter_station_id int, exit_station_id int, time_block int, flow_sum int, flow_n int)";
+
+    if (!q.exec(SMART_INIT)) {
+        emit_sql_error("SQL Error", q);
+        return;
+    }
+
+    if (!q.exec("create index smart_query on smart_travel (start_time ASC)")) {
+        emit_sql_error("SQL Error", q);
+        return;
+    }
+
+    if (!q.exec("create index smart_query_detail on smart_travel (start_time ASC, enter_station_id ASC, exit_station_id ASC, time_block ASC)")) {
+        emit_sql_error("SQL Error", q);
+        return;
+    }
+
     db.close();
 
     emit success(true);

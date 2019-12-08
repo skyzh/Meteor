@@ -140,7 +140,9 @@ void TaskScheduler::on_success(bool ok) {
     tasks.pop_front();
     task_running = false;
     ++task_cnt;
-    if (ok) _schedule();
+    if (ok) _schedule(); else {
+        emit progress(0);
+    }
 }
 
 void TaskScheduler::do_schedule() {
