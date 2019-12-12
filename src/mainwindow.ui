@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -123,7 +123,7 @@
                  <string>Daily</string>
                 </property>
                 <property name="checked">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -133,7 +133,7 @@
                  <string>Hourly</string>
                 </property>
                 <property name="checked">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -160,12 +160,12 @@
              </property>
              <property name="dateTime">
               <datetime>
-               <hour>0</hour>
+               <hour>13</hour>
                <minute>0</minute>
                <second>0</second>
                <year>2019</year>
                <month>1</month>
-               <day>10</day>
+               <day>9</day>
               </datetime>
              </property>
             </widget>
@@ -190,7 +190,7 @@
              </property>
              <property name="dateTime">
               <datetime>
-               <hour>0</hour>
+               <hour>12</hour>
                <minute>0</minute>
                <second>0</second>
                <year>2019</year>
@@ -319,40 +319,6 @@
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="2" column="1">
-            <widget class="QComboBox" name="comboRouteTo">
-             <property name="editable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QComboBox" name="comboBoxSmartWeekday">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="3">
-            <widget class="QPushButton" name="pushButtonRoutePlanning">
-             <property name="text">
-              <string>Route</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="labelSmartWeekday">
-             <property name="text">
-              <string>Weekday</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="2">
             <widget class="QLabel" name="labelRouteDeparture">
              <property name="text">
@@ -363,10 +329,44 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="labelStationFrom">
+             <property name="text">
+              <string>From</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QPushButton" name="pushButtonRoutePlanning">
+             <property name="text">
+              <string>Route</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="3">
+            <widget class="QPushButton" name="pushButtonSmartTravel">
+             <property name="text">
+              <string>Meteor Advisor</string>
+             </property>
+            </widget>
+           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="labelStationTo">
              <property name="text">
               <string>To</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="labelSmartWeekday">
+             <property name="text">
+              <string>Weekday</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -386,23 +386,23 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="labelStationFrom">
-             <property name="text">
-              <string>From</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="3">
             <widget class="QTimeEdit" name="timeEdit"/>
            </item>
-           <item row="5" column="3">
-            <widget class="QPushButton" name="pushButtonSmartTravel">
-             <property name="text">
-              <string>Meteor Advisor</string>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="comboRouteTo">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QComboBox" name="comboBoxSmartWeekday">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
              </property>
             </widget>
            </item>

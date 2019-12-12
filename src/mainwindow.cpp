@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "main.h"
+#include "TouchBar.h"
+#include "db.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -29,13 +30,13 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBoxFlow->addItem("C - Line 2 (Liangzhu - Chaoyang)", "C");
     }
     {
-        ui->comboBoxSmartWeekday->addItem("Monday", "2019-01-07");
-        ui->comboBoxSmartWeekday->addItem("Tuesday", "2019-01-08");
-        ui->comboBoxSmartWeekday->addItem("Wednesday", "2019-01-09");
-        ui->comboBoxSmartWeekday->addItem("Thursday", "2019-01-10");
-        ui->comboBoxSmartWeekday->addItem("Friday", "2019-01-11");
-        ui->comboBoxSmartWeekday->addItem("Saturday", "2019-01-12");
-        ui->comboBoxSmartWeekday->addItem("Sunday", "2019-01-13");
+        ui->comboBoxSmartWeekday->addItem("Monday", QDate(2019, 1, 7));
+        ui->comboBoxSmartWeekday->addItem("Tuesday", QDate(2019, 1, 8));
+        ui->comboBoxSmartWeekday->addItem("Wednesday", QDate(2019, 1, 9));
+        ui->comboBoxSmartWeekday->addItem("Thursday", QDate(2019, 1, 10));
+        ui->comboBoxSmartWeekday->addItem("Friday", QDate(2019, 1, 11));
+        ui->comboBoxSmartWeekday->addItem("Saturday", QDate(2019, 1, 12));
+        ui->comboBoxSmartWeekday->addItem("Sunday", QDate(2019, 1, 13));
     }
 
     delayed_chart_update = new QTimer(this);
@@ -55,9 +56,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&scheduler, &TaskScheduler::message, this, &MainWindow::message);
 
     schedulerProgress->setValue(0);
-    scheduler.start();
-
-    load_station_mapping();
 }
 
 MainWindow::~MainWindow() {
@@ -91,7 +89,6 @@ void MainWindow::setup_status_bar() {
 void MainWindow::setup_chart(QList<QLineSeries *> series) {
     if (chartView) ui->layoutChart->removeWidget(chartView);
     chart = new QChart();
-    chart->legend()->hide();
     QDateTimeAxis *axisX = new QDateTimeAxis;
     axisX->setTickCount(12);
     axisX->setFormat("MM-dd HH:mm");
@@ -117,6 +114,8 @@ void MainWindow::setup_chart(QList<QLineSeries *> series) {
     ui->layoutChart->addWidget(chartView);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setBackgroundRoundness(0);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignTop);
 
     connect(chartView, &MetroChartView::request_data, this, [=]() {
         ui->fromTime->setDateTime(axisX->min());
@@ -131,8 +130,8 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
     task->args({ui->comboRouteFrom->currentData(), ui->comboRouteTo->currentData()});
     scheduler.schedule(task);
     auto smart_travel_task = new TaskSmartTravel(this);
-    auto flow_begin = QDateTime(QDate(2019, 1, 9)).toSecsSinceEpoch();
-    smart_travel_task->args({ flow_begin, flow_begin + 86400 });
+    auto flow_begin = QDateTime(ui->comboBoxSmartWeekday->currentData().toDate()).toSecsSinceEpoch();
+    smart_travel_task->args({flow_begin, flow_begin + 86400});
     scheduler.schedule(smart_travel_task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
@@ -270,7 +269,7 @@ void MainWindow::on_pushButtonFlow_clicked() {
     auto task = new TaskQueryFlow(this);
     flow_date_time = ui->flowDate->dateTime();
     auto flow_begin = flow_date_time.toSecsSinceEpoch();
-    task->args({flow_begin, flow_begin + 86400 });
+    task->args({flow_begin, flow_begin + 86400});
     connect(task, &TaskQueryFlow::result, [=]() {
         auto flow_result = task->get_flow_per_hour_result();
         auto flow_time = task->get_flow_time();
@@ -434,10 +433,12 @@ void MainWindow::update_passenger_chart() {
 
             for (auto &&record : data) {
                 if (record.status == 0)
-                    in_series->append(record.timestamp * 1000, record.count);
+                    in_series->append(record.timestamp * 1000, record.count * (3600 / time_div));
                 if (record.status == 1)
-                    out_series->append(record.timestamp * 1000, record.count);
+                    out_series->append(record.timestamp * 1000, record.count * (3600 / time_div));
             }
+            in_series->setName("Entry per hour");
+            out_series->setName("Exit per hour");
             setup_chart({in_series, out_series});
         });
     });
@@ -471,4 +472,10 @@ void MainWindow::on_fromTime_dateTimeChanged(const QDateTime &dateTime) {
     if (ui->radioButtonHourly->isChecked()) {
         ui->toTime->setDateTime(dateTime.addSecs(3600));
     }
+}
+
+void MainWindow::meteor_wizard_complete() {
+    DB::init();
+    load_station_mapping();
+    scheduler.start();
 }

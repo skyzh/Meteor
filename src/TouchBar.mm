@@ -128,17 +128,11 @@ void setTouchbarSliderFlowValue(int value) {
 
 QPointer<MainWindow> run_application(int argc, char *argv[]);
 
-int main(int argc, char **argv) {
-    QApplication app(argc, argv);
-
-    auto window = run_application(argc, argv);
-    mainWindow = window;
-
+void bindTouchbar(MainWindow &window) {
+    mainWindow = &window;
     {
-        NSView *view = reinterpret_cast<NSView *>(window->winId());
+        NSView *view = reinterpret_cast<NSView *>(window.winId());
         touchBarProvider = [[TouchBarProvider alloc] init];
         [touchBarProvider installAsDelegateForWindow:view.window];
     }
-
-    return app.exec();
 }

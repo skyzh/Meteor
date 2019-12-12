@@ -35,7 +35,8 @@ SOURCES += \
     src/main.cpp \
     src/main.mm \
     src/mainwindow.cpp \
-    src/utils.cpp
+    src/utils.cpp \
+    src/wizard.cpp
 
 HEADERS += \
     src/ConfigManager.h \
@@ -53,10 +54,12 @@ HEADERS += \
     src/TaskScheduler.h \
     src/db.h \
     src/mainwindow.h \
-    src/utils.h
+    src/utils.h \
+    src/wizard.h
 
 FORMS += \
-    src/mainwindow.ui
+    src/mainwindow.ui \
+    src/wizard.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -42,6 +42,8 @@ public:
 
     ~MainWindow();
 
+    void begin_schedule();
+
 private:
     Ui::MainWindow *ui;
     TaskScheduler scheduler;
@@ -117,6 +119,8 @@ public slots:
     void tb_buttonTabFlow_clicked();
 
     void tb_sliderFlow_changed(int value);
+
+    void meteor_wizard_complete();
 };
 
 #endif // MAINWINDOW_H

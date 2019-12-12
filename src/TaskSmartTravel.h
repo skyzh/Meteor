@@ -30,7 +30,7 @@ private:
     QVector<QVector<QVector<unsigned long long>>> flow_sum;
     QVector<QVector<QVector<unsigned long long>>> flow_n;
     QVector<unsigned long long> flow_time;
-    const unsigned long long time_div = 300;
+    const unsigned long long time_div = 60;
 };
 
 

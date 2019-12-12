@@ -3,6 +3,7 @@
 //
 
 #include "ConfigManager.h"
+#include <QDebug>
 
 static ConfigManager* cfm = nullptr;
 
@@ -17,7 +18,6 @@ QVariant ConfigManager::get(QString k) {
 ConfigManager *ConfigManager::instance() {
     if (cfm == nullptr) {
         cfm = new ConfigManager;
-        cfm->_configs["DATASET_PATH"] = "/Users/skyzh/Work/Qt/dataset_CS241";
     }
     return cfm;
 }

@@ -1,4 +1,6 @@
 #include "db.h"
+#include "ConfigManager.h"
+
 #include <QDebug>
 #include <QSqlError>
 
@@ -15,11 +17,6 @@ DB::DB() {
     _db_mutex.lock();
 }
 
-DB::~DB() {
-    QSqlDatabase::removeDatabase("global_conn");
-    _db_mutex.unlock();
-}
-
 void DB::init() {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "global_conn_cache");
     setup_db(db);
@@ -29,9 +26,16 @@ void DB::init() {
     }
 }
 
+DB::~DB() {
+    QSqlDatabase::removeDatabase("global_conn");
+    _db_mutex.unlock();
+}
+
 void DB::setup_db(QSqlDatabase &db) {
-    if (DEVELOPMENT_MODE) {
-        db.setDatabaseName("file:/Users/skyzh/Work/Qt/dataset.db?cache=shared");
+    if (ConfigManager::instance()->get("PERSIST").toBool()) {
+        db.setDatabaseName(
+                QString("file:%1/alex_chi_persistence_dataset.db?cache=shared")
+                        .arg(ConfigManager::instance()->get("DATASET_PATH").toString()));
     } else {
         db.setDatabaseName("file::memory:?cache=shared");
     }
