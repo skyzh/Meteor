@@ -15,6 +15,7 @@ struct MetroStation {
     qulonglong id;
     qreal x, y;
     QString lineID;
+    QString msg;
 };
 
 struct MetroSegment {

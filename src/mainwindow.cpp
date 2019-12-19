@@ -129,10 +129,6 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
     auto task = new TaskPlanRoute(this);
     task->args({ui->comboRouteFrom->currentData(), ui->comboRouteTo->currentData()});
     scheduler.schedule(task);
-    auto smart_travel_task = new TaskSmartTravel(this);
-    auto flow_begin = QDateTime(ui->comboBoxSmartWeekday->currentData().toDate()).toSecsSinceEpoch();
-    smart_travel_task->args({flow_begin, flow_begin + 86400});
-    scheduler.schedule(smart_travel_task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
         if (station_mapping.empty()) return;
@@ -159,8 +155,11 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                     }
                 }
                 board_item->setData(TABLE_LINE, current_line);
+                action_msg[route_] = QString("Board");
                 action_list << board_item;
             }
+
+            QMap<int, QString> action_msg;
 
             auto lst_route = route[0];
 
@@ -181,6 +180,7 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                             transfer_item->setData(TABLE_LINE, lineID);
                             action_list << transfer_item;
                             current_line = lineID;
+                            action_msg[lst_route] = QString("Transfer to %1").arg(lineID);
                             break;
                         }
                     }
@@ -203,12 +203,15 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                 exit_item->setData(TABLE_STATION, route_);
                 exit_item->setData(TABLE_LINE, current_line);
                 action_list << exit_item;
+                action_msg[route_] = QString("Exit");
             }
             ui->tableRoute->setRowCount(action_list.length());
             ui->tableRoute->setColumnCount(1);
             for (int i = 0; i < action_list.length(); i++) {
                 ui->tableRoute->setItem(i, 0, action_list[i]);
             }
+            this->action_msg = action_msg;
+            update_route_map(action_list[0]->data(TABLE_LINE).toString(), -1, action_msg);
         });
     });
 }
@@ -363,11 +366,12 @@ void MainWindow::on_tableRoute_itemSelectionChanged() {
     auto item = ui->tableRoute->currentItem();
     update_route_map(
             item->data(TABLE_LINE).toString(),
-            item->data(TABLE_STATION).toLongLong()
+            item->data(TABLE_STATION).toLongLong(),
+            action_msg
     );
 }
 
-void MainWindow::update_route_map(QString line, long long highlight_station) {
+void MainWindow::update_route_map(QString line, long long highlight_station, QMap<int, QString> msg) {
     QVector<MetroStation> stations;
     QVector<MetroSegment> segments;
     qreal c_x = 0, c_y = 0;
@@ -385,7 +389,8 @@ void MainWindow::update_route_map(QString line, long long highlight_station) {
                 mapping.stationID,
                 x,
                 y,
-                line
+                line,
+                msg[mapping.stationID]
         };
         if (!stations.empty()) {
             auto lst_station = stations.last();
@@ -411,10 +416,8 @@ void MainWindow::update_passenger_chart() {
     if (scheduler.running()) return;
     long long start = ui->fromTime->dateTime().toSecsSinceEpoch();
     long long end = ui->toTime->dateTime().toSecsSinceEpoch();
-    long long time_div = 720;
-    if (end - start <= 60 * 60 * 12) time_div = 300;
-    if (end - start <= 60 * 60 * 1) time_div = 30;
-    if (end - start <= 60) time_div = 1;
+    long long time_div = ui->lineEditTimestep->text().toULongLong();
+    if (time_div == 0) return;
     TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
     task->args({
                        time_div,
@@ -448,20 +451,24 @@ void MainWindow::update_passenger_chart() {
 void MainWindow::on_radioButtonDaily_toggled(bool checked) {
     if (checked) {
         ui->toTime->setDateTime(ui->fromTime->dateTime().addSecs(86400));
+        ui->lineEditTimestep->setText("720");
     }
 }
 
 void MainWindow::on_radioButtonHourly_toggled(bool checked) {
     if (checked) {
         ui->toTime->setDateTime(ui->fromTime->dateTime().addSecs(3600));
+        ui->lineEditTimestep->setText("30");
     }
 }
 
 void MainWindow::on_radioButtonCustom_toggled(bool checked) {
     if (checked) {
         ui->toTime->setEnabled(true);
+        ui->lineEditTimestep->setEnabled(true);
     } else {
         ui->toTime->setEnabled(false);
+        ui->lineEditTimestep->setEnabled(false);
     }
 }
 
@@ -478,4 +485,20 @@ void MainWindow::meteor_wizard_complete() {
     DB::init();
     load_station_mapping();
     scheduler.start();
+}
+
+void MainWindow::on_comboLine_currentIndexChanged(int index) {
+    if (ui->comboLine->currentData() == "All") {
+        ui->comboStation->setEnabled(true);
+    } else {
+        ui->comboStation->setEnabled(false);
+    }
+}
+
+void MainWindow::on_comboStation_currentIndexChanged(int index) {
+    if (ui->comboStation->currentData() == "All") {
+        ui->comboLine->setEnabled(true);
+    } else {
+        ui->comboLine->setEnabled(false);
+    }
 }

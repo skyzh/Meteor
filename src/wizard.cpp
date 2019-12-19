@@ -21,11 +21,16 @@ Wizard::~Wizard() {
     delete ui;
 }
 
+#define DEVELOPMENT
+
 void Wizard::on_pushButtonOpen_clicked() {
-    /* QString path = QFileDialog::getExistingDirectory(
+#ifndef DEVELOPMENT
+    QString path = QFileDialog::getExistingDirectory(
             this,
-            "Select dataset folder"); */
+            "Select dataset folder");
+#else
     QString path = "/Users/skyzh/Work/Qt/dataset_CS241";
+#endif
     ui->buttonBox->setEnabled(configure(path));
 }
 

@@ -79,7 +79,20 @@ void MetroPainter::paint(QPainter *painter, QPaintEvent *event) {
     }
     painter->resetMatrix();
 
-    // [5] Draw Segment Info
+    // [5] Draw Station Name
+    painter->setPen(textPen);
+    painter->setFont(textFont);
+    for (auto &&station : stations) {
+        QMatrix matrix;
+        matrix.translate(station.x + CAMERA_OFFSET_X,
+                         station.y - STATION_CIRCLE_RADIUS - STATION_NAME_MARGIN + CAMERA_OFFSET_Y);
+        matrix.rotate(-45);
+        painter->setMatrix(matrix);
+        painter->drawText(QPointF(0, 0), station.msg);
+    }
+    painter->resetMatrix();
+
+    // [6] Draw Segment Info
     painter->setPen(textPen);
     painter->setFont(textFont);
     for (auto &&segment : segments) {

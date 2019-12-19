@@ -70,12 +70,13 @@ private:
     QVector<unsigned long long> flow_time;
     QDateTime flow_date_time;
     int lst_flow_block;
+    QMap<int, QString> action_msg;
 
     void load_station_mapping();
 
     void update_flow_position(int position, bool force_update = false);
 
-    void update_route_map(QString line, long long highlight_station = -1);
+    void update_route_map(QString line, long long highlight_station = -1, QMap<int, QString> msg = {});
 
     void update_passenger_chart();
 
@@ -109,6 +110,10 @@ private slots:
     void on_radioButtonCustom_toggled(bool checked);
 
     void on_fromTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_comboLine_currentIndexChanged(int index);
+
+    void on_comboStation_currentIndexChanged(int index);
 
 public slots:
 

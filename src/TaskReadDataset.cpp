@@ -130,10 +130,17 @@ QList<Task *> TaskReadDataset::dependencies() {
 }
 
 QList<Task *>
-TaskReadDataset::from_time_range(qulonglong start_time, qulonglong end_time, QObject *parent, bool include_tail) {
-    if (include_tail) end_time += 86400;
+TaskReadDataset::from_time_range(qulonglong _start_time, qulonglong _end_time, QObject *parent, bool include_tail) {
+    QDateTime start_timestamp;
+    start_timestamp.setTime_t(_start_time);
+    start_timestamp.setTime(QTime(0, 0, 0));
+    unsigned long long start_time = start_timestamp.toSecsSinceEpoch();
+    QDateTime end_timestamp;
+    end_timestamp.setTime_t(include_tail ? _end_time : _end_time - 1);
+    end_timestamp.setTime(QTime(0, 0, 0));
+    unsigned long long end_time = end_timestamp.toSecsSinceEpoch();
     QList<Task *> dependencies;
-    for (unsigned long long time = start_time; time < end_time; time += 86400) {
+    for (unsigned long long time = start_time; time <= end_time; time += 86400) {
         QDateTime timestamp;
         timestamp.setTime_t(time);
         QString date = timestamp.toString("yyyy-MM-dd");
