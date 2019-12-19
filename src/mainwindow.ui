@@ -611,6 +611,13 @@
          </layout>
         </item>
         <item>
+         <widget class="QLabel" name="labelFlowUnit">
+          <property name="text">
+           <string>Unit / Volume per hour</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QFrame" name="frameFlow">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">

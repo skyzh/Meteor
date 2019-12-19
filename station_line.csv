@@ -1,0 +1,82 @@
+stationID,lineID,name,chinese_name
+0,B,Xianghu,湘湖
+1,B,Binkang Road,滨康路
+2,B,Xixing,西兴
+3,B,Binhe Road,滨和路
+4,B,Jiangling Road,江陵路
+5,B,Jinjiang,近江
+6,B,Wujiang Road,婺江路
+7,B,Chengzhan,城站
+8,B,Ding'an Road,定安路
+9,B,Longxiangqiao,龙翔桥
+10,B,Fengqi Road,凤起路
+11,B,Wulin Square,武林广场
+12,B,West Lake Cultural Square,西湖文化广场
+13,B,Datieguan,打铁关
+14,B,Zhalongkou,闸弄口
+15,B,East Railway Station,火车东站
+16,B,Pengbu,彭埠
+17,B,Qibao,七堡
+18,B,Jiuhe Road,九和路
+19,B,Jiubao,九堡
+20,B,Coach Center,客运中心
+21,B,West Xiasha,下沙西
+22,B,Jinshahu,金沙湖
+23,B,Gaosha Road,高沙路
+24,B,Wenze Road,文泽路
+25,B,South Wenhai Road,文海南路
+26,B,Yunshui,云水
+27,B,Xiasha Jiangbin,下沙江滨
+28,B,South Qiaosi,乔司南
+29,B,Qiaosi,乔司
+30,B,Wengmei,翁梅
+31,B,Yuhang Hi-Railway Station,余杭高铁站
+32,B,Nanyuan,南苑
+33,B,Linping,临平
+34,C,Chaoyang,朝阳
+35,C,Caojiaqiao,曹家桥
+36,C,Panshui,潘水
+37,C,Renmin Road,人民路
+38,C,Hangfachang,杭发厂
+39,C,People Square,人民广场
+40,C,Jiansheyi Road,建设一路
+41,C,Jianshesan Road,建设三路
+42,C,Zhenning Road,振宁路
+43,C,Feihong Road,飞虹路
+44,C,Yingfeng Road,盈丰路
+45,C,Qianjiang Century City,钱江世纪城
+46,C,Qianjiang Road,钱江路
+47,C,Qingchun Square,庆春广场
+48,C,Qingling Road,庆菱路
+49,C,North Jianguo Road,建国北路
+50,C,North Zhonghe Road,中河北路
+51,C,Fengqi Road,凤起路
+52,C,Wulinmen,武林门
+53,C,Shentangqiao,沈塘桥
+54,C,Xianing Bridge,下宁桥
+55,C,Xueyuan Road,学院路
+56,C,Gucui Road,古翠路
+57,C,Fengtan Road,丰潭路
+58,C,Wenxin,文新
+59,C,Sanba,三坝
+60,C,Xialongwei,虾龙圩
+61,C,Sandun,三墩
+62,C,Dunxiang Street,墩祥街
+63,C,Jinjiadu,金家渡
+64,C,Baiyang,白洋
+65,C,Dufucun,杜甫村
+66,C,Liangzhu,良渚
+67,A,Puyan,浦沿
+68,A,Yangjiadun,杨家墩
+69,A,Chinese Medical University,中医药大学
+70,A,Lianzhuang,联庄
+71,A,Shuichengqiao,水澄桥
+72,A,Fuxing Road,复兴路
+73,A,Nanxingqiao,南星桥
+74,A,Yongjiang Road,甬江路
+75,A,Chengxing Road,城星路
+76,A,Citizen Center,市民中心
+77,A,Jiangjin Road,江锦路
+78,A,Jingfang,景芳
+79,A,Xintang,新塘
+80,A,Xinfeng,新风
