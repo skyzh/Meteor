@@ -7,12 +7,10 @@
 #include <QDebug>
 
 MetroWidget::MetroWidget(MetroPainter *helper, QWidget *parent) :
-        QWidget(parent), helper(helper) {
+        QWidget(parent), helper(helper),
+        animation_x(this, "camera_x"),
+        animation_y(this, "camera_y"){
     setAutoFillBackground(false);
-}
-
-void MetroWidget::animate() {
-    update();
 }
 
 void MetroWidget::paintEvent(QPaintEvent *event) {
@@ -31,6 +29,8 @@ void MetroWidget::wheelEvent(QWheelEvent *event) {
     auto delta = event->pixelDelta();
     auto x = helper->get_camera_x() - delta.x();
     auto y = helper->get_camera_y() - delta.y();
+    m_camera_x = x;
+    m_camera_y = y;
     helper->set_camera_pos(x, y);
     update();
 }
@@ -41,5 +41,24 @@ void MetroWidget::setStations(QVector<MetroStation> stations, QVector<MetroSegme
 }
 
 void MetroWidget::set_camera_pos(qreal x, qreal y) {
-    helper->set_camera_pos(x, y);
+    animation_x.stop();
+    animation_y.stop();
+
+    animation_x.setStartValue(m_camera_x);
+    animation_x.setEndValue(x);
+    animation_x.setDuration(500);
+    animation_x.setEasingCurve(QEasingCurve::InOutQuad);
+
+    animation_y.setStartValue(m_camera_y);
+    animation_y.setEndValue(y);
+    animation_y.setDuration(500);
+    animation_y.setEasingCurve(QEasingCurve::InOutQuad);
+
+    animation_x.start();
+    animation_y.start();
+}
+
+void MetroWidget::camera_moved() {
+    helper->set_camera_pos(m_camera_x, m_camera_y);
+    update();
 }

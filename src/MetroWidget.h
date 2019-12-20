@@ -6,7 +6,11 @@
 #define METRO_METROWIDGET_H
 
 #include "MetroPainter.h"
+
+#include <QWidget>
 #include <QOpenGLWidget>
+#include <QTimer>
+#include <QPropertyAnimation>
 
 class MetroWidget : public QWidget {
 Q_OBJECT
@@ -19,8 +23,12 @@ public:
     void setStations(QVector<MetroStation> stations, QVector<MetroSegment> segments);
 
     void set_camera_pos(qreal x, qreal y);
+
+    Q_PROPERTY(qreal camera_x MEMBER m_camera_x NOTIFY camera_moved)
+    Q_PROPERTY(qreal camera_y MEMBER m_camera_y NOTIFY camera_moved)
+
 public slots:
-    void animate();
+    void camera_moved();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -29,6 +37,10 @@ protected:
 
 private:
     MetroPainter *helper;
+    QEasingCurve easing;
+    QPropertyAnimation animation_x;
+    QPropertyAnimation animation_y;
+    qreal m_camera_x, m_camera_y;
 };
 
 

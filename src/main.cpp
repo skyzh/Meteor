@@ -9,6 +9,11 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     ConfigManager::instance();
+
+    QSurfaceFormat fmt;
+    fmt.setSamples(4);
+    QSurfaceFormat::setDefaultFormat(fmt);
+
     Wizard wizard;
     MainWindow window;
     bindTouchbar(window);
