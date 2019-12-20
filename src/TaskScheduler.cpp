@@ -74,9 +74,9 @@ void TaskScheduler::run() {
     loop.exec();
     if (task_running) {
         auto task = tasks.first();
-        task->cancel();
-        task->quit();
-        task->wait();
+        task.task->cancel();
+        task.task->quit();
+        task.task->wait();
     }
 }
 
@@ -103,7 +103,7 @@ bool TaskScheduler::init_journal() {
 void TaskScheduler::_schedule() {
     if (task_running) return;
     while (!tasks.empty()) {
-        auto task = tasks.first();
+        auto task = tasks.first().task;
         if (task->journal() && is_journaled(task->name())) {
             tasks.pop_front();
             ++task_cnt;
@@ -115,7 +115,7 @@ void TaskScheduler::_schedule() {
         return;
     }
     task_running = true;
-    auto task = tasks.first();
+    auto task = tasks.first().task;
     connect(task, &Task::progress, this, &TaskScheduler::on_progress);
     connect(task, &Task::message, this, &TaskScheduler::on_message);
     connect(task, &Task::success, this, &TaskScheduler::on_success);
@@ -135,12 +135,13 @@ void TaskScheduler::on_message(QString msg) {
 
 void TaskScheduler::on_success(bool ok) {
     QMutexLocker l(&_tasks_mutex);
-    auto task = tasks.first();
+    auto task = tasks.first().task;
     if (task->journal()) do_journal(task->name());
     tasks.pop_front();
     task_running = false;
     ++task_cnt;
-    if (ok) _schedule(); else {
+    if (ok) _schedule();
+    else {
         emit progress(0);
     }
 }
@@ -182,12 +183,17 @@ void TaskScheduler::emit_message(QString msg) {
     }
 }
 
-void TaskScheduler::resolve(Task *task) {
+void TaskScheduler::resolve(Task *task, QString parent) {
     QList<Task *> dependencies = task->dependencies();
+    QString name = task->display_name();
     for (Task *dependency: dependencies) {
-        resolve(dependency);
+        resolve(dependency, name);
     }
-    tasks << task;
+    if (!parent.isEmpty()) {
+        tasks.push_back({task, QString("before %1").arg(parent)});
+    } else {
+        tasks.push_back({task});
+    }
     ++task_cnt_total;
 }
 

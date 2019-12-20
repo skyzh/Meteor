@@ -375,20 +375,6 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="3">
-            <widget class="QPushButton" name="pushButtonRoutePlanning">
-             <property name="text">
-              <string>Route</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="3">
-            <widget class="QPushButton" name="pushButtonSmartTravel">
-             <property name="text">
-              <string>Meteor Advisor</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="0">
             <widget class="QLabel" name="labelStationTo">
              <property name="text">
@@ -450,6 +436,20 @@
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="pushButtonRoutePlanning">
+             <property name="text">
+              <string>Route</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="3">
+            <widget class="QCheckBox" name="checkBoxAdviser">
+             <property name="text">
+              <string>Enable Meteor Adviser</string>
              </property>
             </widget>
            </item>

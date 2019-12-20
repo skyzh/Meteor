@@ -7,12 +7,17 @@
 #include <QList>
 #include <QMutex>
 
+
 class TaskScheduler : public QThread {
 Q_OBJECT
 
+    struct SchedulerInfo {
+        Task *task;
+        QString msg;
+    };
 
     QMutex _tasks_mutex;
-    QList<Task *> tasks;
+    QList<SchedulerInfo> tasks;
     bool task_running;
     QString current_task_name;
     int task_cnt, task_cnt_total;
@@ -29,7 +34,7 @@ Q_OBJECT
 
     void emit_message(QString msg = "");
 
-    void resolve(Task* task);
+    void resolve(Task *task, QString parent = "");
 
 signals:
 

@@ -8,9 +8,8 @@
 #include "MetroPainter.h"
 #include "TaskPlanRoute.h"
 #include "TaskGetMapping.h"
-#include "TaskFlowAnalysis.h"
 #include "TaskQueryFlow.h"
-#include "TaskSmartTravel.h"
+#include "TaskQuerySmartTravel.h"
 #include "MetroChartView.h"
 
 #include <QMainWindow>
@@ -73,8 +72,13 @@ private:
     MetroPainter metroRoutePainter;
     QList<qulonglong> route_stations;
     QMap<int, QString> route_action_msg;
+    QVector<unsigned long long> route_eta;
+    QVector<QVector<QVector<unsigned long long>>> route_flow_result;
+    QVector<unsigned long long> route_flow_time;
 
     void update_route_map(QString line, long long highlight_station = -1, QMap<int, QString> msg = {});
+
+    void update_route_info();
 
     // Flow Analysis
     MetroWidget *metroWidgetFlow;
@@ -121,8 +125,6 @@ private slots:
     void on_comboLine_currentIndexChanged(int index);
 
     void on_comboStation_currentIndexChanged(int index);
-
-    void on_pushButtonSmartTravel_clicked();
 
 public slots:
 

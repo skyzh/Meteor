@@ -7,6 +7,16 @@
 
 #include "Task.h"
 
+#include <QVector>
+#include <QList>
+
+struct SmartTravelRecord {
+    unsigned long long enter_station_id, exit_station_id, enter_time_block;
+    double travel_time, cost;
+};
+
+bool operator<(const SmartTravelRecord &a, const SmartTravelRecord &b);
+
 class TaskQuerySmartTravel : public Task {
 Q_OBJECT
 
@@ -21,6 +31,10 @@ public:
 
     QString display_name() override;
 
+    QList<qulonglong> route_stations;
+
+    QVector<double> get_estimated_time();
+
 protected:
     void run() override;
 
@@ -34,7 +48,16 @@ signals:
 
 private:
     unsigned long long departure_time;
+    unsigned long long start_time;
     const unsigned long long time_div = 60;
+
+    void preprocess_distance_mapping();
+
+    QVector<QVector<int>> distance;
+
+    QVector<double> estimated_time;
+
+    double travel_time;
 };
 
 

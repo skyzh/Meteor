@@ -56,7 +56,7 @@ QString TaskQueryFlow::name() {
 }
 
 QString TaskQueryFlow::display_name() {
-    return "Query Flow";
+    return "Estimating Segment Flow";
 }
 
 void TaskQueryFlow::run() {
@@ -104,7 +104,10 @@ void TaskQueryFlow::run() {
         }
     }
 
-    if (_cancel) return;
+    if (_cancel) {
+        emit success(false);
+        return;
+    }
 
     // [3] Obtain Hourly Data
     postprocess_flow_data();
@@ -112,6 +115,8 @@ void TaskQueryFlow::run() {
     if (!_cancel) {
         emit result();
         emit success(true);
+    } else {
+        emit success(false);
     }
 
     db.close();
