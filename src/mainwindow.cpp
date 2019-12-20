@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->comboBoxSmartWeekday->addItem("Friday", QDate(2019, 1, 11));
         ui->comboBoxSmartWeekday->addItem("Saturday", QDate(2019, 1, 12));
         ui->comboBoxSmartWeekday->addItem("Sunday", QDate(2019, 1, 13));
+        ui->comboBoxSmartWeekday->setCurrentIndex(2);
     }
 
     delayed_chart_update = new QTimer(this);

@@ -12,7 +12,6 @@ class TaskQueryFlow : public Task {
 Q_OBJECT
 
 public:
-
     TaskQueryFlow(QObject *parent);
 
     bool journal() override;
@@ -46,6 +45,7 @@ private:
     QMutex _data_mutex;
 
     void init_flow_data();
+
     void postprocess_flow_data();
 
     unsigned long long start_time;

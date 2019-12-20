@@ -45,6 +45,7 @@ public:
     void begin_schedule();
 
 private:
+    // Basic UI and Statusbar
     Ui::MainWindow *ui;
     TaskScheduler scheduler;
     QProgressBar *schedulerProgress;
@@ -52,33 +53,39 @@ private:
 
     void setup_status_bar();
 
-    void setup_chart(QList<QLineSeries *> series);
-
-    QChart *chart;
-    MetroChartView *chartView;
-    MetroWidget *metroWidgetRoute;
-    MetroWidget *metroWidgetFlow;
-    MetroPainter metroRoutePainter;
-    MetroPainter metroFlowPainter;
-
-    QTimer *delayed_chart_update;
-
+    // Station Name Mapping and Metro Line Stations
     QVector<TaskGetMapping::Mapping> station_mapping;
     QMap<QString, QList<qulonglong>> metros;
 
+    void load_station_mapping();
+
+    // Passenger Chart
+    QChart *chart;
+    MetroChartView *chartView;
+    QTimer *delayed_chart_update;
+
+    void setup_chart(QList<QLineSeries *> series);
+
+    void update_passenger_chart();
+
+    // Route Planning
+    MetroWidget *metroWidgetRoute;
+    MetroPainter metroRoutePainter;
+    QList<qulonglong> route_stations;
+    QMap<int, QString> route_action_msg;
+
+    void update_route_map(QString line, long long highlight_station = -1, QMap<int, QString> msg = {});
+
+    // Flow Analysis
+    MetroWidget *metroWidgetFlow;
+    MetroPainter metroFlowPainter;
     QVector<QVector<QVector<unsigned long long>>> flow_result;
     QVector<unsigned long long> flow_time;
     QDateTime flow_date_time;
     int lst_flow_block;
-    QMap<int, QString> action_msg;
-
-    void load_station_mapping();
 
     void update_flow_position(int position, bool force_update = false);
 
-    void update_route_map(QString line, long long highlight_station = -1, QMap<int, QString> msg = {});
-
-    void update_passenger_chart();
 
     const int TABLE_STATION = Qt::UserRole + 1;
     const int TABLE_LINE = Qt::UserRole + 2;

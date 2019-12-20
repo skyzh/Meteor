@@ -5,17 +5,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QDebug>
+
 void MainWindow::on_pushButtonRoutePlanning_clicked() {
     auto task = new TaskPlanRoute(this);
     task->args({ui->comboRouteFrom->currentData(), ui->comboRouteTo->currentData()});
-    scheduler.schedule(task);
 
     connect(task, &TaskPlanRoute::result, [=]() {
         if (station_mapping.empty()) return;
 
-        QList<qulonglong> route = task->get_data();
+        route_stations = task->get_data();
 
-        if (route.size() == 0) return;
+        if (route_stations.size() == 0) return;
 
         QMetaObject::invokeMethod(this, [=]() {
             QMap<int, QString> action_msg;
@@ -24,7 +25,7 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
             QList<QTableWidgetItem *> action_list;
             QString current_line;
             {
-                auto route_ = route[0];
+                auto route_ = route_stations[0];
                 auto board_item = new QTableWidgetItem(
                         QString("Board at %1 Station")
                                 .arg(station_mapping[route_].name));
@@ -41,10 +42,10 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                 action_list << board_item;
             }
 
-            auto lst_route = route[0];
+            auto lst_route = route_stations[0];
 
-            for (int i = 1; i < route.size(); i++) {
-                auto route_ = route[i];
+            for (int i = 1; i < route_stations.size(); i++) {
+                auto route_ = route_stations[i];
 
                 auto &stations = metros[current_line];
                 if (!stations.count(route_)) {
@@ -76,7 +77,7 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                 lst_route = route_;
             }
             {
-                auto route_ = route.last();
+                auto route_ = route_stations.last();
                 auto exit_item = new QTableWidgetItem(
                         QString("Exit at %1 Station")
                                 .arg(station_mapping[route_].name));
@@ -90,10 +91,12 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
             for (int i = 0; i < action_list.length(); i++) {
                 ui->tableRoute->setItem(i, 0, action_list[i]);
             }
-            this->action_msg = action_msg;
+            route_action_msg = action_msg;
             update_route_map(action_list[0]->data(TABLE_LINE).toString(), -1, action_msg);
         });
     });
+
+    scheduler.schedule(task);
 }
 
 
@@ -143,10 +146,27 @@ void MainWindow::on_tableRoute_itemSelectionChanged() {
     update_route_map(
             item->data(TABLE_LINE).toString(),
             item->data(TABLE_STATION).toLongLong(),
-            action_msg
+            route_action_msg
     );
 }
 
 void MainWindow::on_pushButtonSmartTravel_clicked() {
+    auto flow_task = new TaskQueryFlow(this);
+    auto flow_date = ui->comboBoxSmartWeekday->currentData().toDate();
+    auto flow_begin = QDateTime(flow_date).toSecsSinceEpoch();
+    flow_task->args({flow_begin, flow_begin + 86400});
 
+    connect(flow_task, &TaskQueryFlow::result, [=]() {
+        QMetaObject::invokeMethod(this, [=]() {
+
+        });
+    });
+
+    auto smart_travel_task = new TaskSmartTravel(this);
+    auto departure_time = QDateTime(flow_date, ui->timeEditDeparture->time());
+    qDebug() << departure_time;
+    smart_travel_task->args({departure_time.toSecsSinceEpoch()});
+
+    scheduler.schedule(smart_travel_task);
+    scheduler.schedule(flow_task);
 }
