@@ -115,6 +115,8 @@ private slots:
 
     void on_comboStation_currentIndexChanged(int index);
 
+    void on_pushButtonSmartTravel_clicked();
+
 public slots:
 
     void tb_buttonTabQuery_clicked();

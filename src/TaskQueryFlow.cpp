@@ -25,7 +25,8 @@ QVector<QVector<QVector<unsigned long long>>> TaskQueryFlow::get_flow_per_hour_r
 }
 
 void TaskQueryFlow::postprocess_flow_data() {
-    const int window_size = 3600 / time_div;
+    const int window_length = 300;
+    const int window_size = window_length / time_div;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             qulonglong sum = 0;
@@ -34,7 +35,7 @@ void TaskQueryFlow::postprocess_flow_data() {
                 int sub = tb - window_size;
                 sum += flow[i][j][tb];
                 if (sub >= 0) sum -= flow[i][j][sub];
-                flow_per_hour[i][j][tb] = sum;
+                flow_per_hour[i][j][tb] = sum * (3600 / window_length);
             }
         }
     }

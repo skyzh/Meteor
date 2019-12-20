@@ -55,6 +55,20 @@ void TaskReadDataset::run() {
     tm _tm;
     time_t epoch;
 
+    // [1] Rollback possible changes
+    emit message("Purging data");
+
+    q.prepare("delete from dataset where time <= :start_time and :end_time < time");
+
+    auto begin_date = QDateTime::fromString(at_date, "yyyy-MM-dd");
+    q.bindValue(":start_time", begin_date.toSecsSinceEpoch());
+    q.bindValue(":end_time", (begin_date.addDays(1)).toSecsSinceEpoch());
+
+    if (!q.exec()) {
+        emit_sql_error("Error when purging data", q);
+        return;
+    }
+
     db.transaction();
 
     emit message("Processing files");
@@ -62,7 +76,7 @@ void TaskReadDataset::run() {
     for (auto &&filename : datasets) {
         emit progress(double(cnt++) / datasets.length());
 
-        // [1] Try open file
+        // [2] Try open file
         QFile file(QString("%1%2").arg(DATASET_PATH).arg(filename));
         if (!file.open(QIODevice::ReadOnly)) {
             emit message(QString("Failed to open file %1").arg(filename));
@@ -70,7 +84,7 @@ void TaskReadDataset::run() {
             return;
         }
 
-        // [2] Load and parse file
+        // [3] Load and parse file
         QTextStream in(&file);
         auto header = in.readLine();
         QString value_placeholder = "?";
@@ -80,7 +94,7 @@ void TaskReadDataset::run() {
 
         int time_col = _header.indexOf("time");
 
-        // [3] Insert into database
+        // [4] Insert into database
         auto sql_statement = QString("insert into dataset (%1) values (%2)").arg(header).arg(value_placeholder);
 
         q.prepare(sql_statement);

@@ -18,6 +18,8 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
         if (route.size() == 0) return;
 
         QMetaObject::invokeMethod(this, [=]() {
+            QMap<int, QString> action_msg;
+
             ui->tableRoute->clear();
             QList<QTableWidgetItem *> action_list;
             QString current_line;
@@ -38,8 +40,6 @@ void MainWindow::on_pushButtonRoutePlanning_clicked() {
                 action_msg[route_] = QString("Board");
                 action_list << board_item;
             }
-
-            QMap<int, QString> action_msg;
 
             auto lst_route = route[0];
 
@@ -145,4 +145,8 @@ void MainWindow::on_tableRoute_itemSelectionChanged() {
             item->data(TABLE_STATION).toLongLong(),
             action_msg
     );
+}
+
+void MainWindow::on_pushButtonSmartTravel_clicked() {
+
 }

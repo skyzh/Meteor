@@ -30,6 +30,7 @@ void Wizard::on_pushButtonOpen_clicked() {
             "Select dataset folder");
 #else
     QString path = "/Users/skyzh/Work/Qt/dataset_CS241";
+    ui->checkBox->setChecked(true);
 #endif
     ui->buttonBox->setEnabled(configure(path));
 }

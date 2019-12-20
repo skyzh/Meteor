@@ -124,4 +124,3 @@ void MainWindow::meteor_wizard_complete() {
     load_station_mapping();
     scheduler.start();
 }
-
