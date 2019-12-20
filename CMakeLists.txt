@@ -63,6 +63,6 @@ add_executable(Meteor
         src/TaskBaseFlowAnalysis.h
         src/wizard.h
         src/wizard.cpp
-        src/wizard.ui)
+        src/wizard.ui src/mainwindowTouchBar.cpp src/mainwindow_tab_flow.cpp src/mainwindow_tab_route.cpp src/mainwindow_tab_passenger.cpp)
 
 target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
