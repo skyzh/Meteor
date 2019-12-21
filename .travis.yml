@@ -1,18 +1,13 @@
 dist: bionic
 language: cpp
+before_install:
+  - sudo add-apt-repository -y ppa:beineri/opt-qt-5.12.0-bionic
+  - sudo apt -q update
+  - sudo apt install qt512base qt512charts-no-lgpl qt512declarative libsqlite3-dev cmake ninja-build
 scripts:
+  - source /opt/qt512/bin/qt512-env.sh
   - cmake -H. -GNinja -Bbuild -DCMAKE_BUILD_TYPE=$BUILD_TYPE
   - cd build && cmake --build .
 env:
   - BUILD_TYPE=DEBUG
   - BUILD_TYPE=RELEASE
-addons:
-  apt:
-    packages:
-    - qt5-qmake
-    - qtbase5-dev
-    - qtdeclarative5-dev
-    - libqt5charts5-dev
-    - libsqlite3-dev
-    - cmake
-    - ninja-build
