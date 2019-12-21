@@ -14,9 +14,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (NOT APPLE)
     add_definitions(-DDISABLE_TOUCH_BAR)
-    set(TOUCHBAR_SRCS src/Touchbar.cpp)
+    set(TOUCHBAR_SRCS src/TouchBar.cpp)
 else()
-    set(TOUCHBAR_SRCS src/Touchbar.mm)
+    set(TOUCHBAR_SRCS src/TouchBar.mm)
 endif()
 
 find_package(Qt5 COMPONENTS Widgets Sql Charts REQUIRED)
