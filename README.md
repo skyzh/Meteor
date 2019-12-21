@@ -1,10 +1,10 @@
 # Meteor
 
-Visualize and analyze Hangzhou Metro data with Qt
+Visualize and analyze Hangzhou Metro data with Qt.
 
 ## Building
 
-On macOS, use CMake to build this project.
+On macOS, use CMake to build this project. Replace $QT_ROOT_PATH with Qt folder. It's usually `~/Qt`.
 
 ```bash
 cmake -H. -Bbuild -DCMAKE_PREFIX_PATH=$QT_ROOT_PATH/5.12.6/clang_64/lib/cmake
