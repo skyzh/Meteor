@@ -24,10 +24,18 @@ public:
 
     void set_camera_pos(qreal x, qreal y);
 
-    Q_PROPERTY(qreal camera_x MEMBER m_camera_x NOTIFY camera_moved)
-    Q_PROPERTY(qreal camera_y MEMBER m_camera_y NOTIFY camera_moved)
+    Q_PROPERTY(qreal camera_x
+                       MEMBER
+                       m_camera_x
+                       NOTIFY
+                       camera_moved)
+    Q_PROPERTY(qreal camera_y
+                       MEMBER
+                       m_camera_y
+                       NOTIFY
+                       camera_moved)
 
-public slots:
+signals:
     void camera_moved();
 
 protected:
@@ -41,6 +49,8 @@ private:
     QPropertyAnimation animation_x;
     QPropertyAnimation animation_y;
     qreal m_camera_x, m_camera_y;
+
+    void on_camera_moved();
 };
 
 

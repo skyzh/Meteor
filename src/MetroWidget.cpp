@@ -11,6 +11,7 @@ MetroWidget::MetroWidget(MetroPainter *helper, QWidget *parent) :
         animation_x(this, "camera_x"),
         animation_y(this, "camera_y"){
     setAutoFillBackground(false);
+    connect(this, &MetroWidget::camera_moved, this, &MetroWidget::on_camera_moved);
 }
 
 void MetroWidget::paintEvent(QPaintEvent *event) {
@@ -58,7 +59,7 @@ void MetroWidget::set_camera_pos(qreal x, qreal y) {
     animation_y.start();
 }
 
-void MetroWidget::camera_moved() {
+void MetroWidget::on_camera_moved() {
     helper->set_camera_pos(m_camera_x, m_camera_y);
     update();
 }
