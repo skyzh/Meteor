@@ -1,0 +1,18 @@
+dist: bionic
+scripts:
+  - cmake -H. -GNinja -Bbuild -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - cd build && cmake --build .
+env:
+  - BUILD_TYPE=DEBUG
+  - BUILD_TYPE=RELEASE
+addons:
+  apt:
+    sources:
+      - ppa:ubuntu-sdk-team/ppa
+    packages:
+    - qt5-qmake
+    - qtbase5-dev
+    - qtdeclarative5-dev
+    - libsqlite3-dev
+    - cmake
+    - ninja-build
