@@ -1,7 +1,7 @@
 dist: bionic
 language: cpp
 scripts:
-  - cmake -H. -GNinja -Bbuild -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+  - cmake -H. -GNinja -Bbuild -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DDISABLE_TOUCHBAR
   - cd build && cmake --build .
 env:
   - BUILD_TYPE=DEBUG
@@ -12,6 +12,7 @@ addons:
     - qt5-qmake
     - qtbase5-dev
     - qtdeclarative5-dev
+    - qtcharts5-dev
     - libsqlite3-dev
     - cmake
     - ninja-build

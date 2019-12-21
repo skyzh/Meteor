@@ -1,5 +1,9 @@
 #include "mainwindow.h"
 
+#ifdef DISABLE_TOUCHBAR
+void bindTouchbar(MainWindow &window) {}
+void setTouchbarSliderFlowValue(int value) {}
+#else
 #include <QtWidgets>
 #include <QMetaObject>
 #import <AppKit/AppKit.h>
@@ -126,8 +130,6 @@ void setTouchbarSliderFlowValue(int value) {
         [touchBarProvider setSliderValue:value];
 }
 
-QPointer<MainWindow> run_application(int argc, char *argv[]);
-
 void bindTouchbar(MainWindow &window) {
     mainWindow = &window;
     {
@@ -136,3 +138,4 @@ void bindTouchbar(MainWindow &window) {
         [touchBarProvider installAsDelegateForWindow:view.window];
     }
 }
+#endif
