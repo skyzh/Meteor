@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 
-#ifndef DISABLE_TOUCHBAR
+#ifndef DISABLE_TOUCH_BAR
 #include <QtWidgets>
 #include <QMetaObject>
 #import <AppKit/AppKit.h>
