@@ -14,6 +14,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (NOT APPLE)
     add_definitions(-DDISABLE_TOUCH_BAR)
+    set(TOUCHBAR_SRCS src/Touchbar.cpp)
+else()
+    set(TOUCHBAR_SRCS src/Touchbar.mm)
 endif()
 
 find_package(Qt5 COMPONENTS Widgets Sql Charts REQUIRED)
@@ -24,6 +27,7 @@ add_executable(Meteor
         src/main.cpp
         src/mainwindow.cpp
         src/mainwindow.h
+        ${TOUCHBAR_SRCS}
         src/Task.cpp
         src/Task.h
         src/TaskDelay.cpp
@@ -39,7 +43,6 @@ add_executable(Meteor
         src/TaskAddTimestamp.h
         src/TaskInitDatabase.cpp
         src/TaskInitDatabase.h
-        src/TouchBar.mm
         src/TaskPlanRoute.cpp
         src/TaskPlanRoute.h
         src/ConfigManager.cpp
@@ -67,7 +70,11 @@ add_executable(Meteor
         src/TaskBaseFlowAnalysis.h
         src/wizard.h
         src/wizard.cpp
-        src/wizard.ui src/mainwindowTouchBar.cpp src/mainwindow_tab_flow.cpp src/mainwindow_tab_route.cpp src/mainwindow_tab_passenger.cpp)
+        src/wizard.ui 
+        src/mainwindowTouchBar.cpp 
+        src/mainwindow_tab_flow.cpp 
+        src/mainwindow_tab_route.cpp 
+        src/mainwindow_tab_passenger.cpp)
 
 if (APPLE)
     target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")

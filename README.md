@@ -1,5 +1,7 @@
 # Meteor
 
+[![Build Status](https://travis-ci.com/skyzh/Meteor.svg?token=szB6fz2m5vb2KyfAiZ3B&branch=master)](https://travis-ci.com/skyzh/Meteor)
+
 Visualize and analyze Hangzhou Metro data with Qt.
 
 ## Building
@@ -12,8 +14,6 @@ cd build && cmake --build .
 ```
 
 ## Running
-
-
 
 In `build` folder,
 
