@@ -12,6 +12,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+if (NOT APPLE)
+    add_definitions(-DDISABLE_TOUCH_BAR)
+endif()
+
 find_package(Qt5 COMPONENTS Widgets Sql Charts REQUIRED)
 
 add_executable(Meteor
@@ -65,4 +69,10 @@ add_executable(Meteor
         src/wizard.cpp
         src/wizard.ui src/mainwindowTouchBar.cpp src/mainwindow_tab_flow.cpp src/mainwindow_tab_route.cpp src/mainwindow_tab_passenger.cpp)
 
-target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
+if (APPLE)
+    target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")
+else()
+    target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts)
+endif()
+
+
