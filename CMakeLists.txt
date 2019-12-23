@@ -74,7 +74,7 @@ add_executable(Meteor
         src/mainwindowTouchBar.cpp 
         src/mainwindow_tab_flow.cpp 
         src/mainwindow_tab_route.cpp 
-        src/mainwindow_tab_passenger.cpp src/SmartTravelModel.hpp)
+        src/mainwindow_tab_passenger.cpp src/SmartTravelModel.hpp src/Meteor.h)
 
 if (APPLE)
     target_link_libraries(Meteor PRIVATE Qt5::Core Qt5::Sql Qt5::Widgets Qt5::Charts "-framework AppKit")

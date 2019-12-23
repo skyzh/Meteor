@@ -13,6 +13,8 @@ cmake -H. -Bbuild -DCMAKE_PREFIX_PATH=$QT_ROOT_PATH/5.12.6/clang_64/lib/cmake -D
 cd build && cmake --build .
 ```
 
+Or you may open this project with CLion, configure Qt in CMake settings, and build with `Release` target.
+
 ## Running
 
 In `build` folder,
@@ -27,17 +29,19 @@ Copy `station_line.csv` to `dataset_CS241/adjacency_adjacency/`. Select dataset 
 
 Uncheck "Persist Analysis Cache" will make data loading faster in current session, but data will be loaded again if you restart the app.
 
-## Passenger Traffic
+## Analysis
+
+### Passenger Traffic
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 00 12 PM" src="https://user-images.githubusercontent.com/4198311/71302744-f4d25a80-23e9-11ea-9a1e-f2c4cde096ff.png">
 
-## Route Planning
+### Route Planning
 
 Select "Meteor Adviser" to show ETA and crowded rate.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 00 45 PM" src="https://user-images.githubusercontent.com/4198311/71302746-f56af100-23e9-11ea-9686-9e47a24d5098.png">
 
-## Flow Analysis
+### Flow Analysis
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 01 00 PM" src="https://user-images.githubusercontent.com/4198311/71302747-f56af100-23e9-11ea-9a3e-97369d8f2c70.png">
 

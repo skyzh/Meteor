@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "wizard.h"
 #include "ConfigManager.h"
+#include "Meteor.h"
 
 #include <QApplication>
 #include <QMessageBox>

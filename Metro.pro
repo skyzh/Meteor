@@ -17,44 +17,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+DEFINES += DO_NOT_COMPILE_WITH_QMAKE
+
 SOURCES += \
-    src/ConfigManager.cpp \
-    src/MetroPainter.cpp \
-    src/MetroWidget.cpp \
-    src/Task.cpp \
-    src/TaskAddTimestamp.cpp \
-    src/TaskDelay.cpp \
-    src/TaskFlowAnalysis.cpp \
-    src/TaskGetMapping.cpp \
-    src/TaskInitDatabase.cpp \
-    src/TaskPlanRoute.cpp \
-    src/TaskQueryEntryExit.cpp \
-    src/TaskReadDataset.cpp \
-    src/TaskScheduler.cpp \
-    src/db.cpp \
     src/main.cpp \
-    src/main.mm \
     src/mainwindow.cpp \
-    src/utils.cpp \
     src/wizard.cpp
 
 HEADERS += \
-    src/ConfigManager.h \
-    src/MetroPainter.h \
-    src/MetroWidget.h \
-    src/Task.h \
-    src/TaskAddTimestamp.h \
-    src/TaskDelay.h \
-    src/TaskFlowAnalysis.h \
-    src/TaskGetMapping.h \
-    src/TaskInitDatabase.h \
-    src/TaskPlanRoute.h \
-    src/TaskQueryEntryExit.h \
-    src/TaskReadDataset.h \
-    src/TaskScheduler.h \
-    src/db.h \
     src/mainwindow.h \
-    src/utils.h \
     src/wizard.h
 
 FORMS += \
