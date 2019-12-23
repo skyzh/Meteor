@@ -16,7 +16,7 @@
 #include <QProgressBar>
 #include <QLabel>
 #include <QChartView>
-#include <QLineSeries>
+#include <QSplineSeries>
 #include <QChart>
 #include <QTableWidgetItem>
 #include <QTimer>
@@ -63,7 +63,7 @@ private:
     MetroChartView *chartView;
     QTimer *delayed_chart_update;
 
-    void setup_chart(QList<QLineSeries *> series);
+    void setup_chart(QList<QSplineSeries *> series);
 
     void update_passenger_chart();
 

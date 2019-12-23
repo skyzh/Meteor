@@ -10,6 +10,7 @@
 
 #include <QDebug>
 #include <queue>
+#include <vector>
 
 using std::priority_queue;
 
@@ -58,57 +59,23 @@ void TaskQuerySmartTravel::run() {
         return;
     }
 
-    QVector<priority_queue<SmartTravelRecord>> neighbours_vec;
+    std::vector<SmartTravelModel> models;
     const int K = 10;
 
-    for (auto &&route : route_stations) neighbours_vec.push_back({});
-
     auto enter_station_id = route_stations[0];
+    for (auto &&route : route_stations)
+        models.push_back(SmartTravelModel(enter_station_id, route, depature_time_block, distance));
 
     while (q.next()) {
-        for (int i = 0; i < route_stations.size(); i++) {
-            auto &neighbours = neighbours_vec[i];
-            auto exit_station_id = route_stations[i];
-
-            auto _enter = q.value(1).toUInt();
-            auto _exit = q.value(2).toUInt();
-            auto _tb = q.value(3).toUInt();
-            auto delta_enter = distance[_enter][enter_station_id] * 10;
-            auto delta_exit = distance[_exit][exit_station_id] * 10;
-            auto delta_departure = _tb - depature_time_block;
-            auto delta_n = 1.0 / q.value(5).toUInt() * 5;
-            double cost = delta_enter * delta_enter + delta_exit * delta_exit + delta_departure * delta_departure +
-                          delta_n * delta_n;
-            travel_time = double(q.value(4).toUInt()) / q.value(5).toUInt();
-            auto record = SmartTravelRecord{
-                    _enter, _exit, _tb, travel_time, cost
-            };
-            if (neighbours.size() < K) {
-                neighbours.push(record);
-            } else {
-                if (neighbours.top().cost > cost) {
-                    neighbours.pop();
-                    neighbours.push(record);
-                }
-            }
+        for (auto &&model: models) {
+            model.train(q.value(1).toUInt(), q.value(2).toUInt(),
+                            q.value(3).toUInt(), q.value(4).toUInt(),
+                            q.value(5).toUInt());
         }
     }
 
-    for (int i = 0; i < route_stations.size(); i++) {
-        auto &neighbours = neighbours_vec[i];
-        double sum = 0; int n = 0;
-        while (!neighbours.empty()) {
-            auto x = neighbours.top();
-            neighbours.pop();
-            // if (x.cost > 300) continue;
-            sum += x.travel_time;
-            n += 1;
-        }
-        if (n == 0) {
-            estimated_time.push_back(0);
-        } else {
-            estimated_time.push_back(sum / n);
-        }
+    for (auto &&model: models) {
+        estimated_time.push_back(model.predict());
     }
 
     for (int i = 0; i < route_stations.size() - 1; i++) {
@@ -156,4 +123,3 @@ QVector<double> TaskQuerySmartTravel::get_estimated_time() {
     return estimated_time;
 }
 
-bool operator<(const SmartTravelRecord &a, const SmartTravelRecord &b) { return a.cost < b.cost; }

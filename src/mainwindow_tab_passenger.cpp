@@ -28,13 +28,13 @@ void MainWindow::update_passenger_chart() {
         QVector<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
-            QLineSeries *in_series = new QLineSeries;
-            QLineSeries *out_series = new QLineSeries;
+            QSplineSeries *in_series = new QSplineSeries;
+            QSplineSeries *out_series = new QSplineSeries;
 
             for (auto &&record : data) {
-                if (record.status == 0)
-                    in_series->append(record.timestamp * 1000, record.count * (3600 / time_div));
                 if (record.status == 1)
+                    in_series->append(record.timestamp * 1000, record.count * (3600 / time_div));
+                if (record.status == 0)
                     out_series->append(record.timestamp * 1000, record.count * (3600 / time_div));
             }
             in_series->setName("Entry per hour");
@@ -95,7 +95,7 @@ void MainWindow::on_comboStation_currentIndexChanged(int index) {
 }
 
 
-void MainWindow::setup_chart(QList<QLineSeries *> series) {
+void MainWindow::setup_chart(QList<QSplineSeries *> series) {
     if (chartView) ui->layoutChart->removeWidget(chartView);
     chart = new QChart();
     QDateTimeAxis *axisX = new QDateTimeAxis;

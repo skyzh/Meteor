@@ -6,16 +6,10 @@
 #define METRO_TASKQUERYSMARTTRAVEL_H
 
 #include "Task.h"
+#include "SmartTravelModel.hpp"
 
 #include <QVector>
 #include <QList>
-
-struct SmartTravelRecord {
-    unsigned long long enter_station_id, exit_station_id, enter_time_block;
-    double travel_time, cost;
-};
-
-bool operator<(const SmartTravelRecord &a, const SmartTravelRecord &b);
 
 class TaskQuerySmartTravel : public Task {
 Q_OBJECT
