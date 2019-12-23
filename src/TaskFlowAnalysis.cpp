@@ -51,25 +51,6 @@ bool TaskFlowAnalysis::init_flow_data(QSqlQuery& q) {
     return true;
 }
 
-bool TaskFlowAnalysis::process_flow_data(const FlowResult &flow_) {
-    qulonglong enter_time_block = (flow_.enter_time - start_time) / time_div,
-            exit_time_block = (flow_.exit_time - start_time) / time_div;
-    qulonglong time_block_cnt = exit_time_block - enter_time_block;
-    qulonglong lst_time_block = enter_time_block;
-    auto &route = route_cache[flow_.enter_station][flow_.exit_station];
-    int route_size = route.size() - 1;
-    for (int i = 0; i < route_size; i++) {
-        qulonglong current_time_block = double(i) / route_size * time_block_cnt + enter_time_block;
-        auto route_enter = route[i];
-        auto route_exit = route[i + 1];
-        for (qulonglong tb = lst_time_block; tb <= current_time_block; tb++) {
-            ++flow[route_enter][route_exit][tb];
-        }
-        lst_time_block = current_time_block;
-    }
-    return true;
-}
-
 bool TaskFlowAnalysis::commit_to_database(QSqlQuery &q) {
     emit message("Committing to database");
 

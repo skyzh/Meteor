@@ -33,6 +33,11 @@ private:
     const unsigned long long time_div = 60;
 };
 
-
+inline bool TaskSmartTravel::process_flow_data(const FlowResult &flow_) {
+    qulonglong tb = (flow_.enter_time - start_time) / time_div;
+    ++flow_n[flow_.enter_station][flow_.exit_station][tb];
+    flow_sum[flow_.enter_station][flow_.exit_station][tb] += flow_.exit_time - flow_.enter_time;
+    return true;
+}
 
 #endif //METRO_TASKSMARTTRAVEL_H

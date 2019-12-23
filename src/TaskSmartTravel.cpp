@@ -48,13 +48,6 @@ bool TaskSmartTravel::init_flow_data(QSqlQuery &q) {
     return true;
 }
 
-bool TaskSmartTravel::process_flow_data(const FlowResult &flow_) {
-    qulonglong tb = (flow_.enter_time - start_time) / time_div;
-    ++flow_n[flow_.enter_station][flow_.exit_station][tb];
-    flow_sum[flow_.enter_station][flow_.exit_station][tb] += flow_.exit_time - flow_.enter_time;
-    return true;
-}
-
 bool TaskSmartTravel::commit_to_database(QSqlQuery &q) {
     emit message("Committing to database");
 
