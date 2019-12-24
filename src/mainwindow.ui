@@ -39,7 +39,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -412,13 +412,20 @@
             <widget class="QTimeEdit" name="timeEditDeparture">
              <property name="dateTime">
               <datetime>
-               <hour>12</hour>
+               <hour>8</hour>
                <minute>0</minute>
                <second>0</second>
                <year>2000</year>
                <month>1</month>
                <day>1</day>
               </datetime>
+             </property>
+             <property name="time">
+              <time>
+               <hour>8</hour>
+               <minute>0</minute>
+               <second>0</second>
+              </time>
              </property>
             </widget>
            </item>
@@ -684,7 +691,21 @@
     <addaction name="actionRoute_Planning"/>
     <addaction name="actionFlow"/>
    </widget>
+   <widget class="QMenu" name="menuMiscellaneous">
+    <property name="title">
+     <string>Miscellaneous</string>
+    </property>
+    <addaction name="actionBenchmark"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionView_on_GitHub"/>
+   </widget>
    <addaction name="menuViews"/>
+   <addaction name="menuMiscellaneous"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionPassenger_Traffic">
@@ -700,6 +721,16 @@
   <action name="actionFlow">
    <property name="text">
     <string>Flow Analysis</string>
+   </property>
+  </action>
+  <action name="actionBenchmark">
+   <property name="text">
+    <string>Benchmark</string>
+   </property>
+  </action>
+  <action name="actionView_on_GitHub">
+   <property name="text">
+    <string>View on GitHub</string>
    </property>
   </action>
  </widget>

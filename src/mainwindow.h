@@ -52,6 +52,8 @@ private:
 
     void setup_status_bar();
 
+    void do_benchmark(QString title, Task* task);
+
     // Station Name Mapping and Metro Line Stations
     QVector<TaskGetMapping::Mapping> station_mapping;
     QMap<QString, QList<qulonglong>> metros;
@@ -125,6 +127,10 @@ private slots:
     void on_comboLine_currentIndexChanged(int index);
 
     void on_comboStation_currentIndexChanged(int index);
+
+    void on_actionBenchmark_triggered();
+
+    void on_actionView_on_GitHub_triggered();
 
 public slots:
 

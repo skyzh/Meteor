@@ -15,7 +15,8 @@ void MainWindow::update_passenger_chart() {
     long long end = ui->toTime->dateTime().toSecsSinceEpoch();
     long long time_div = ui->lineEditTimestep->text().toULongLong();
     if (time_div == 0) return;
-    TaskQueryEntryExit *task = new TaskQueryEntryExit(this);
+    auto task = new TaskQueryEntryExit(this);
+
     task->args({
                        time_div,
                        start,
@@ -28,8 +29,8 @@ void MainWindow::update_passenger_chart() {
         QVector<TaskQueryEntryExit::EntryExitResult> data = task->get_data();
 
         QMetaObject::invokeMethod(this, [=]() {
-            QSplineSeries *in_series = new QSplineSeries;
-            QSplineSeries *out_series = new QSplineSeries;
+            auto in_series = new QSplineSeries;
+            auto out_series = new QSplineSeries;
 
             for (auto &&record : data) {
                 if (record.status == 1)
@@ -79,19 +80,11 @@ void MainWindow::on_fromTime_dateTimeChanged(const QDateTime &dateTime) {
 }
 
 void MainWindow::on_comboLine_currentIndexChanged(int index) {
-    if (ui->comboLine->currentData() == "All") {
-        ui->comboStation->setEnabled(true);
-    } else {
-        ui->comboStation->setEnabled(false);
-    }
+    ui->comboStation->setEnabled(ui->comboLine->currentData() == "All");
 }
 
 void MainWindow::on_comboStation_currentIndexChanged(int index) {
-    if (ui->comboStation->currentData() == "All") {
-        ui->comboLine->setEnabled(true);
-    } else {
-        ui->comboLine->setEnabled(false);
-    }
+    ui->comboLine->setEnabled(ui->comboStation->currentData() == "All");
 }
 
 

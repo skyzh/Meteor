@@ -25,7 +25,7 @@ public:
 
     virtual bool journal();
 
-    virtual QList<Task*> dependencies();
+    virtual QList<Task *> dependencies();
 
     virtual QString name();
 
@@ -35,10 +35,10 @@ public:
 
     void cancel();
 
+    virtual void run() override;
+
 protected:
     std::atomic<bool> _cancel;
-
-    virtual void run() override;
 
     ~Task() override;
 

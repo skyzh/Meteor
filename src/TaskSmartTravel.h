@@ -22,7 +22,7 @@ public:
 protected:
     bool init_flow_data(QSqlQuery& q) override;
 
-    bool process_flow_data(const FlowResult &flow_) override;
+    bool process_flow_data(const FlowResult &flow_) final;
 
     bool commit_to_database(QSqlQuery &q) override;
 
