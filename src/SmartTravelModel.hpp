@@ -27,7 +27,7 @@ public:
 
     double predict();
 private:
-    const int K = 10;
+    const unsigned int K = 10;
     unsigned long long enter_station_id, exit_station_id, time_block;
     const QVector<QVector<int>> &distance;
     std::priority_queue<SmartTravelRecord> neighbours;
