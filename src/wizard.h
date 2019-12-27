@@ -27,6 +27,7 @@ private slots:
 private:
     Ui::Wizard *ui;
     QMap<QString, QCheckBox*> checkBoxs;
+    QMap<QString, QVariant> filter;
     bool configure(QString path);
 };
 

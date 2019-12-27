@@ -15,13 +15,12 @@ Wizard::Wizard(QWidget *parent) :
         ui(new Ui::Wizard) {
     ui->setupUi(this);
     ConfigManager::instance()->set("PERSIST", false);
+    ConfigManager::instance()->set("FILTER", filter);
 }
 
 Wizard::~Wizard() {
     delete ui;
 }
-
-#define DEVELOPMENT
 
 void Wizard::on_pushButtonOpen_clicked() {
 #ifndef DEVELOPMENT
@@ -49,7 +48,7 @@ bool Wizard::configure(QString path) {
     }
     if (!directory.exists("adjacency_adjacency/station_line.csv")) {
         QMessageBox::warning(this, "Warning",
-                             "Real-world mapping not found, "
+                             "Real-world mapping (station_line.csv) not found, "
                              "please follow the instructions provided in README.md.");
         return false;
     }
@@ -70,25 +69,38 @@ bool Wizard::configure(QString path) {
     auto header = in.readLine().trimmed();
     auto fields = header.split(",");
     for (auto &&key : checkBoxs.keys()) {
+
         ui->verticalLayoutField->removeWidget(checkBoxs[key]);
+        delete checkBoxs[key];
     }
     checkBoxs.clear();
+    filter.clear();
     QList<QString> required_fields = {
             "time", "lineID", "stationID", "status", "userID"
     };
     for (auto &&field : fields) {
-        QCheckBox *checkBox = new QCheckBox(field, this);
+        auto checkBox = new QCheckBox(field, this);
         checkBox->setChecked(true);
         if (required_fields.indexOf(field) != -1) {
             checkBox->setEnabled(false);
         }
+        filter[field] = true;
         ui->verticalLayoutField->addWidget(checkBox);
+        checkBoxs[field] = checkBox;
+        connect(checkBox, &QCheckBox::stateChanged, [=](int) {
+            filter[field] = checkBox->isChecked();
+            ConfigManager::instance()->set("FILTER", filter);
+        });
     }
+    ConfigManager::instance()->set("FILTER", filter);
     return true;
 }
 
 void Wizard::on_checkBox_stateChanged(int arg1) {
     ConfigManager::instance()->set("PERSIST", ui->checkBox->isChecked());
+    ui->labelHint->setText(ui->checkBox->isChecked()
+                           ? "A new file called \"alex_chi_persistence_dataset.db\" will be created in that folder. You may remove it later."
+                           : "You'll lose all cached data after restarting the program.");
 }
 
 void Wizard::on_lineEditPath_textChanged(const QString &arg1) {

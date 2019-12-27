@@ -94,6 +94,18 @@ void TaskReadDataset::run() {
 
         int time_col = _header.indexOf("time");
 
+        QVector<bool> bind_field;
+        auto filter = ConfigManager::instance()->get("FILTER").toMap();
+        bool do_filter = false;
+        for (auto&& col_name: _header) {
+            auto filter_col = filter[col_name].toBool();
+            bind_field.push_back(filter_col);
+            do_filter = do_filter | (!filter_col);
+        }
+
+        if (do_filter)
+            emit message("Processing files (some fields ignored)");
+
         // [4] Insert into database
         auto sql_statement = QString("insert into dataset (%1) values (%2)").arg(header).arg(value_placeholder);
 
@@ -108,7 +120,10 @@ void TaskReadDataset::run() {
                         epoch = mktime(&_tm);
                     q.bindValue(i, (qulonglong) epoch);
                 } else
-                    q.bindValue(i, row[i]);
+                    if (bind_field[i])
+                        q.bindValue(i, row[i]);
+                    else
+                        q.bindValue(i, {});
             }
             if (!q.exec()) {
                 emit_sql_error("SQL Error", q);
