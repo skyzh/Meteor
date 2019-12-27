@@ -33,19 +33,25 @@ Uncheck "Persist Analysis Cache" will make data loading faster in current sessio
 
 ### Passenger Traffic
 
+You may view passenger inflow and outflow data in each station.
+
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 00 12 PM" src="https://user-images.githubusercontent.com/4198311/71302744-f4d25a80-23e9-11ea-9a1e-f2c4cde096ff.png">
 
 ### Route Planning
 
-Select "Meteor Adviser" to show ETA and crowded rate.
+Meteor may plan route for you. Select "Meteor Adviser" to show ETA and crowded rate.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 00 45 PM" src="https://user-images.githubusercontent.com/4198311/71302746-f56af100-23e9-11ea-9686-9e47a24d5098.png">
 
 ### Flow Analysis for Segment Pressure
 
-You may use the slider on screen or on Touch Bar to navigate time through a day.
+By predicting where a user should be from entry and exit records in dataset, Meteor can visualize segment pressure. You may use the slider on screen or the one on Touch Bar to navigate time through a day.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 01 00 PM" src="https://user-images.githubusercontent.com/4198311/71302747-f56af100-23e9-11ea-9a3e-97369d8f2c70.png">
+
+## Task Scheduling System
+
+All computational works are organized in tasks. You may implement your own analysis task by inheriting `Task` class. There's a task scheduler handling tasks dependencies and running them in the background.
 
 ## Learn More
 
