@@ -76,7 +76,7 @@ void MainWindow::update_route_info() {
                         long current_flow_block = iter - route_flow_time.begin();
                         auto pressure = route_flow_result[lst_station_][station_][current_flow_block];
                         auto pressure_index = std::min(pressure / 50000.0, 1.0);
-                        if (pressure_index > 0.5) {
+                        if (pressure_index > 0.3) {
                             action_msg[station_] += QString(" %1% Crowded").arg(int(pressure_index * 100));
                         }
                     }

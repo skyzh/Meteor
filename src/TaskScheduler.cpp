@@ -136,7 +136,7 @@ void TaskScheduler::on_message(QString msg) {
 void TaskScheduler::on_success(bool ok) {
     QMutexLocker l(&_tasks_mutex);
     auto task = tasks.first().task;
-    if (task->journal()) do_journal(task->name());
+    if (ok && task->journal()) do_journal(task->name());
     tasks.pop_front();
     task_running = false;
     ++task_cnt;
