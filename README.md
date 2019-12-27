@@ -29,7 +29,7 @@ Copy `station_line.csv` to `dataset_CS241/adjacency_adjacency/`. Select dataset 
 
 Uncheck "Persist Analysis Cache" will make data loading faster in current session, but data will be loaded again if you restart the app.
 
-## Analysis
+## Functionalities
 
 ### Passenger Traffic
 
@@ -41,7 +41,9 @@ Select "Meteor Adviser" to show ETA and crowded rate.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 00 45 PM" src="https://user-images.githubusercontent.com/4198311/71302746-f56af100-23e9-11ea-9686-9e47a24d5098.png">
 
-### Flow Analysis
+### Flow Analysis for Segment Pressure
+
+You may use the slider on screen or on Touch Bar to navigate time through a day.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 01 00 PM" src="https://user-images.githubusercontent.com/4198311/71302747-f56af100-23e9-11ea-9a3e-97369d8f2c70.png">
 
