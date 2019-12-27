@@ -47,6 +47,12 @@ You may use the slider on screen or on Touch Bar to navigate time through a day.
 
 <img width="1280" alt="Screen Shot 2019-12-21 at 12 01 00 PM" src="https://user-images.githubusercontent.com/4198311/71302747-f56af100-23e9-11ea-9a3e-97369d8f2c70.png">
 
+## Learn More
+
+["The Meteor Project" Report](https://github.com/skyzh/Meteor/files/4005176/The.Meteor.Project.Report.pdf)
+
+["The Meteor Project" Slides](https://github.com/skyzh/Meteor/files/4005177/The.Meteor.Project.Slide.pdf)
+
 ## License
 
 GPL-3.0
