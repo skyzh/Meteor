@@ -59,6 +59,8 @@ All computational works are organized in tasks. You may implement your own analy
 
 ["The Meteor Project" Slides](https://github.com/skyzh/Meteor/files/4005177/The.Meteor.Project.Slide.pdf)
 
+SJTU users may download presentation video from [jBox](https://jbox.sjtu.edu.cn/l/R09Dzw)
+
 ## License
 
 GPL-3.0
